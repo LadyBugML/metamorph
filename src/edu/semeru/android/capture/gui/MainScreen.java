@@ -22,6 +22,7 @@ import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.text.SimpleDateFormat;
 import java.util.List;
 
 import javax.imageio.ImageIO;
@@ -44,6 +45,7 @@ import javax.swing.JTextArea;
 import javax.swing.JTextField;
 import javax.swing.SwingConstants;
 import javax.swing.SwingWorker;
+import javax.swing.Timer;
 import javax.swing.UIManager;
 import javax.swing.border.Border;
 import javax.swing.event.ChangeEvent;
@@ -70,9 +72,15 @@ public class MainScreen extends JFrame{
 	Process geteventProcess;
 
 	private JLabel statusLabel;
+	private JLabel timerLabel;
+	private JLabel timer;
+	JButton startBtn;
+	JButton stopBtn;
 	JLabel previewPicLabel;
 	private JTextArea excpetionLabel;
+	private int count = 180000;
 	JButton implementationSrcSelectorBtn;
+	Timer cdTimer;
 
 	private JDialog loading;
 
@@ -110,6 +118,8 @@ public class MainScreen extends JFrame{
 
 		JLabel outputPathLabel = new JLabel("Output Path:");
 		JLabel versionNumberLabel = new JLabel("v0.1");
+		timer = new JLabel("3:00");
+		timerLabel = new JLabel("Video Time Remaining:");
 
 		BufferedImage previewPic = ImageIO.read(new File("libs" + File.separator + "img" + File.separator + "preview.png"));
 		previewPicLabel = new JLabel(new ImageIcon(previewPic.getScaledInstance(120, 214, Image.SCALE_SMOOTH)));
@@ -120,16 +130,17 @@ public class MainScreen extends JFrame{
 		JButton outputFolderSelectorBtn = new JButton();
 		outputFolderSelectorBtn.addActionListener(new OutputFolderSelectorBtnListener());
 		
-		JButton startBtn = new JButton("Start Capture");
+		startBtn = new JButton("Start Capture");
 		startBtn.setToolTipText("Click Here to capture a video recording and replayable script of actions on your android device.");
 		startBtn.addActionListener(new startBtnListener());
 		
-		JButton stopBtn = new JButton("End Catpure");
+		stopBtn = new JButton("End Catpure");
         stopBtn.setToolTipText("Click Here to to stop the capture process.");
         stopBtn.addActionListener(new stopBtnListener());
+        stopBtn.setEnabled(false);
 
 		ImageIcon gvtIcon = new ImageIcon("resources/GVT-Logo.png");
-
+		
 		try {
 			Image img = ImageIO.read(new File("resources/File-Open.png"));
 			img = img.getScaledInstance(25, 25, Image.SCALE_DEFAULT);
@@ -150,6 +161,9 @@ public class MainScreen extends JFrame{
 
 
 		setContentPane(scrPane);
+		
+	    cdTimer = new Timer(1000, new TimerListener());
+	    cdTimer.setInitialDelay(0);
 
 		c = new GridBagConstraints(); //since there aren't too  many components, we just use one constraints object
 		c.insets = new Insets(2, 0, 2, 0);
@@ -200,6 +214,14 @@ public class MainScreen extends JFrame{
 		c.gridx = 0;
 		c.gridy = 14;
 		toolPane.add(statusLabel, c);
+		
+		c.gridx = 0;
+        c.gridy = 15;
+        toolPane.add(timerLabel, c);
+        
+        c.gridx = 1;
+        c.gridy = 15;
+        toolPane.add(timer, c);
 
 		c.gridx = 2;
 		c.gridy = 41;
@@ -228,10 +250,22 @@ public class MainScreen extends JFrame{
 		loading.setLocationRelativeTo(this);
 		loading.setDefaultCloseOperation(JDialog.DO_NOTHING_ON_CLOSE);
 		loading.setModal(true);
+		
 
 	}
 
-	
+	 public class TimerListener implements ActionListener {
+
+	        @Override
+	        public void actionPerformed(ActionEvent e) {
+	                SimpleDateFormat df=new SimpleDateFormat("mm:ss");
+	                timer.setText(df.format(count));
+	                repaint();
+	                count = count-1000;
+
+	        }
+	 }
+	 
 
 	public class OutputFolderSelectorBtnListener implements ActionListener {
 		@Override
@@ -263,6 +297,12 @@ public class MainScreen extends JFrame{
 
 	                            videoProcess.destroy();
 	                            geteventProcess.destroy();
+	                            startBtn.setEnabled(true);
+	                            stopBtn.setEnabled(false);
+	                            cdTimer.stop();
+	                            count=180000; 
+	                            SimpleDateFormat df=new SimpleDateFormat("mm:ss");
+	                            timer.setText(df.format(count));
 	                            Thread.sleep(2000);
 	                            Controller.pullVideo(outputFolderTextField.getText() + File.separator + "video.mp4");
 	                            
@@ -339,11 +379,11 @@ public class MainScreen extends JFrame{
                     excpetionLabel.setVisible(false);
                     if(outputFolderTextField.getText() != null && !outputFolderTextField.getText().isEmpty()){
                         try {
-                            
-                           
+                            startBtn.setEnabled(false);
+                            stopBtn.setEnabled(true);
                             videoProcess = Controller.startVideoCapture();
                             geteventProcess = Controller.startGetEventCapture(outputFolderTextField.getText() + File.separator+ "getevent.log");
-                            
+                            cdTimer.start();
 //                            File screenshot = new File(outputFolderTextField.getText() + File.separator + "screen.png");
 //                            File uiDump = new File(outputFolderTextField.getText() + File.separator + "ui-dump.xml");
 

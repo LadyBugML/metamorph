@@ -179,10 +179,10 @@ public class Controller {
         System.out.println("Capturing getevent...");
         if (SystemUtils.IS_OS_MAC || SystemUtils.IS_OS_LINUX) {
             uiCommand1 = new String[] { androidSDKPath + File.separator + "platform-tools" + File.separator + "adb",
-                    "shell", "getevent"};
+                    "shell", "getevent", "-t"};
         } else {
             uiCommand1 = new String[] { androidSDKPath + File.separator + "platform-tools" + File.separator + "adb",
-                    "shell", "getevent"};
+                    "shell", "getevent", "-t"};
 
         }
 
