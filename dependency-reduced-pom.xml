@@ -1,10 +1,10 @@
 <?xml version="1.0" encoding="UTF-8"?>
 <project xmlns="http://maven.apache.org/POM/4.0.0" xmlns:xsi="http://www.w3.org/2001/XMLSchema-instance" xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/maven-v4_0_0.xsd">
   <modelVersion>4.0.0</modelVersion>
-  <groupId>GVT</groupId>
-  <artifactId>GVT</artifactId>
+  <groupId>Android-VCT</groupId>
+  <artifactId>Android-VCT</artifactId>
   <name>GVT</name>
-  <version>1.2.0</version>
+  <version>1.0</version>
   <build>
     <sourceDirectory>src</sourceDirectory>
     <resources>
@@ -36,7 +36,7 @@
             <configuration>
               <transformers>
                 <transformer>
-                  <mainClass>edu.semeru.android.guichecker.gui.MainScreen</mainClass>
+                  <mainClass>edu.semeru.android.capture.gui.MainScreen</mainClass>
                 </transformer>
               </transformers>
             </configuration>

@@ -122,10 +122,10 @@ public class Controller {
         System.out.println("Capturing Screenshot...");
         if (SystemUtils.IS_OS_MAC || SystemUtils.IS_OS_LINUX) {
             uiCommand1 = new String[] { androidSDKPath + File.separator + "platform-tools" + File.separator + "adb",
-                    "shell", "screenrecord", "/sdcard/video.mp4" };
+                    "shell", "screenrecord", "/sdcard/video.mp4", "--bit-rate", "8000000" };
         } else {
             uiCommand1 = new String[] { androidSDKPath + File.separator + "platform-tools" + File.separator + "adb.exe",
-                    "shell", "screenrecord", "/sdcard/video.mp4" };
+                    "shell", "screenrecord", "/sdcard/video.mp4", "--bit-rate", "8000000" };
 
         }
 
@@ -181,14 +181,13 @@ public class Controller {
             uiCommand1 = new String[] { androidSDKPath + File.separator + "platform-tools" + File.separator + "adb",
                     "shell", "getevent", "-t"};
         } else {
-            uiCommand1 = new String[] { androidSDKPath + File.separator + "platform-tools" + File.separator + "adb",
+            uiCommand1 = new String[] { androidSDKPath + File.separator + "platform-tools" + File.separator + "adb.exe",
                     "shell", "getevent", "-t"};
 
         }
 
         // create a new process
         System.out.println("Creating Process");
-
         File testoutput = new File(outputPath);
         testoutput.createNewFile();
         ProcessBuilder builder = new ProcessBuilder(uiCommand1);

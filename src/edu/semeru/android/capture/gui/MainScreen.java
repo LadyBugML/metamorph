@@ -383,6 +383,7 @@ public class MainScreen extends JFrame{
                             stopBtn.setEnabled(true);
                             videoProcess = Controller.startVideoCapture();
                             geteventProcess = Controller.startGetEventCapture(outputFolderTextField.getText() + File.separator+ "getevent.log");
+                            loading.setVisible(false);
                             cdTimer.start();
 //                            File screenshot = new File(outputFolderTextField.getText() + File.separator + "screen.png");
 //                            File uiDump = new File(outputFolderTextField.getText() + File.separator + "ui-dump.xml");
@@ -443,8 +444,8 @@ public class MainScreen extends JFrame{
 
             worker2.execute();
             statusLabel.setText("Capturing Information...");
-//            loading.setLocation(getFrameXCoord(), getFrameYCoord());
-//            loading.setVisible(true);
+            loading.setLocation(getFrameXCoord(), getFrameYCoord());
+            loading.setVisible(true);
 
         }
 	}
