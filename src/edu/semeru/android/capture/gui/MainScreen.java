@@ -234,7 +234,7 @@ public class MainScreen extends JFrame{
 		toolPane.add(excpetionLabel, c);
 
 
-		setTitle("Android Device Capture Tool");
+		setTitle("Android Video Capture Tool");
 		setIconImage(gvtIcon.getImage());
 		pack();
 		setLocationRelativeTo(null);
@@ -296,7 +296,6 @@ public class MainScreen extends JFrame{
 	                        try {
 
 	                            videoProcess.destroy();
-	                            geteventProcess.destroy();
 	                            startBtn.setEnabled(true);
 	                            stopBtn.setEnabled(false);
 	                            cdTimer.stop();
@@ -305,6 +304,7 @@ public class MainScreen extends JFrame{
 	                            timer.setText(df.format(count));
 	                            Thread.sleep(2000);
 	                            Controller.pullVideo(outputFolderTextField.getText() + File.separator + "video.mp4");
+	                            geteventProcess.destroy();
 	                            
 	                            File video = new File(outputFolderTextField.getText() + File.separator + "video.mp4");
 	                            File getevent = new File(outputFolderTextField.getText() + File.separator + "getevent.log");
@@ -379,6 +379,10 @@ public class MainScreen extends JFrame{
                     excpetionLabel.setVisible(false);
                     if(outputFolderTextField.getText() != null && !outputFolderTextField.getText().isEmpty()){
                         try {
+                            File outputFile = new File(outputFolderTextField.getText());
+                            if(!outputFile.exists()) {
+                                outputFile.mkdirs();
+                            }
                             startBtn.setEnabled(false);
                             stopBtn.setEnabled(true);
                             videoProcess = Controller.startVideoCapture();
