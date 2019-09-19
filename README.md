@@ -1,4 +1,7 @@
-# Android-GUI-Checker
-Android GUI-Checker
+# Android-Video-and-Trace-Recorder
 
-The inception of a mobile application typically takes the form of a mock-up of the Graphical User Interface (GUI), represented as a static image delineating the proper layout and location of GUI widgets, that will satisfy the intended requirements of the app.  Following this initial design phase, the design artifacts (typically created by a dedicated UI/UX team) are then handed off to developers whose goal is to accurately implement these GUIs and the desired functionality that meets the app requirements.  The main problem with this process is that it is typically very time-consuming and intellectually intensive for design teams to verify that screens of a mobile app were implemented according to the specifications in the design artifacts. Therefore, in order to better support the designers and developers within Huawei that experience the scenario described above, the goal of this project is to develop a tool that is capable of analyzing a GUI design mock-up, the corresponding implementation of the design, and detecting design violations. 
+#+html: <p align="center"><img src="resources/ui.png" /></p>
+
+## Overview
+
+This 
