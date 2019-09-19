@@ -24,7 +24,7 @@ BuildGVT:
     - 'mvn $MAVEN_CLI_OPTS -Dmaven.test.skip=true package'
   artifacts:
     paths:
-    - target/GVT.jar
+    - target/AVTR.jar
     - docs/README.pdf
     - properties.json
     - libs/
