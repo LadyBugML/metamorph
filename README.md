@@ -9,7 +9,7 @@ This is a small GUI-based tool for capturing screen recordings and getevent trac
 ## Installation
 
 *  Simply import the Java project into Eclipse and run the `MainScreen.java` class.
-*  You can also use the pre-packaged applications from the Tags.
+*  You can also use the pre-packaged applications from the [CI Builds](https://gitlab.com/SEMERU-Code/Android/Android-Video-and-Trace-Recorder/-/artifacts/master/download?job=AVTR).
 
 ## Features
 
