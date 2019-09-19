@@ -18,7 +18,7 @@ testGVT:
   script:
     - 'mvn $MAVEN_CLI_OPTS test'
 
-BuildGVT:
+BuildAVTR:
   stage: build
   script:
     - 'mvn $MAVEN_CLI_OPTS -Dmaven.test.skip=true package'
