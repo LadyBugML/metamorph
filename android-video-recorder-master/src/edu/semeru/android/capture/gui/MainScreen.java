@@ -332,6 +332,7 @@ public class MainScreen extends JFrame{
 	                            excpetionLabel.setText(sw.toString());
 	                            excpetionLabel.setVisible(true);
 	                            System.out.println(sw.toString());
+	                            done();
 	                        }
 
 	                    }else{
@@ -381,7 +382,8 @@ public class MainScreen extends JFrame{
                     try {
                         File outputFile = new File(outputFolderTextField.getText());
                         if(!outputFile.exists()) {
-                        	outputFile.mkdirs();
+                        	if(!outputFile.mkdirs())
+                        		throw new Exception();
                         }
                         startBtn.setEnabled(false);
                         stopBtn.setEnabled(true);
@@ -418,6 +420,7 @@ public class MainScreen extends JFrame{
                         excpetionLabel.setText(sw.toString());
                         excpetionLabel.setVisible(true);
                         System.out.println(sw.toString());
+                        done();
                     }
 
                     return "done";
@@ -425,7 +428,7 @@ public class MainScreen extends JFrame{
                 }
                 @Override
                 protected void done() {
-//                    loading.dispose();
+                    loading.dispose();
                 }
             };
 
