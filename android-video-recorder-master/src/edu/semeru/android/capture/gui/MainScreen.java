@@ -371,24 +371,24 @@ public class MainScreen extends JFrame{
 	public class startBtnListener implements ActionListener {
 		@Override
 		public void actionPerformed(ActionEvent e) {
-
+			
 		    SwingWorker<String, Void> worker2 = new SwingWorker<String, Void>() {
-
+		    	
                 @Override
                 protected String doInBackground() throws InterruptedException {
+                	//boolean validDir = true;
                     excpetionLabel.setVisible(false);
-                    if(outputFolderTextField.getText() != null && !outputFolderTextField.getText().isEmpty()){
-                        try {
-                            File outputFile = new File(outputFolderTextField.getText());
-                            if(!outputFile.exists()) {
-                                outputFile.mkdirs();
-                            }
-                            startBtn.setEnabled(false);
-                            stopBtn.setEnabled(true);
-                            videoProcess = Controller.startVideoCapture();
-                            geteventProcess = Controller.startGetEventCapture(outputFolderTextField.getText() + File.separator+ "getevent.log");
-                            loading.setVisible(false);
-                            cdTimer.start();
+                    try {
+                        File outputFile = new File(outputFolderTextField.getText());
+                        if(!outputFile.exists()) {
+                        	outputFile.mkdirs();
+                        }
+                        startBtn.setEnabled(false);
+                        stopBtn.setEnabled(true);
+                        videoProcess = Controller.startVideoCapture();
+                        geteventProcess = Controller.startGetEventCapture(outputFolderTextField.getText() + File.separator+ "getevent.log");
+                        loading.setVisible(false);
+                        cdTimer.start();
 //                            File screenshot = new File(outputFolderTextField.getText() + File.separator + "screen.png");
 //                            File uiDump = new File(outputFolderTextField.getText() + File.separator + "ui-dump.xml");
 
@@ -409,32 +409,15 @@ public class MainScreen extends JFrame{
 
 //                            }
 
-                        } catch (Exception e2) {
-                            StringWriter sw = new StringWriter();
-                            PrintWriter pw = new PrintWriter(sw);
-                            e2.printStackTrace(pw);
-                            // stack trace as a string
-                            statusLabel.setText("Error Running Analysis! Please check your Settings.");
-                            excpetionLabel.setText(sw.toString());
-                            excpetionLabel.setVisible(true);
-                            System.out.println(sw.toString());
-                        }
-
-                    }else{
-                        System.out.println("Parameters not correct!");
-                        statusLabel.setForeground(Color.RED);
-                        statusLabel.setText("Please Ensure all Fields are Filled!!");
-
-                        BufferedImage previewPic;
-                        try {
-                            previewPic = ImageIO.read(new File("libs" + File.separator + "img" + File.separator + "preview.png"));
-                            previewPicLabel.setIcon(new ImageIcon(previewPic.getScaledInstance(120, 214, Image.SCALE_SMOOTH)));
-                        } catch (IOException e) {
-                            // TODO Auto-generated catch block
-                            e.printStackTrace();
-                        }
-
-
+                    } catch (Exception e2) {
+                        StringWriter sw = new StringWriter();
+                        PrintWriter pw = new PrintWriter(sw);
+                        e2.printStackTrace(pw);
+                        // stack trace as a string
+                        statusLabel.setText("Error Running Analysis! Please check your Settings.");
+                        excpetionLabel.setText(sw.toString());
+                        excpetionLabel.setVisible(true);
+                        System.out.println(sw.toString());
                     }
 
                     return "done";
@@ -446,11 +429,26 @@ public class MainScreen extends JFrame{
                 }
             };
 
-            worker2.execute();
-            statusLabel.setText("Capturing Information...");
-            loading.setLocation(getFrameXCoord(), getFrameYCoord());
-            loading.setVisible(true);
-
+            if(outputFolderTextField.getText() != null && !outputFolderTextField.getText().isEmpty()) {
+                worker2.execute();
+                statusLabel.setText("Capturing Information...");
+                loading.setLocation(getFrameXCoord(), getFrameYCoord());
+                loading.setVisible(true);
+            } else {
+                System.out.println("Parameters not correct!");
+                statusLabel.setForeground(Color.RED);
+                statusLabel.setText("Please Ensure all Fields are Filled!!");
+                
+                BufferedImage previewPic;
+                try {
+                    previewPic = ImageIO.read(new File("libs" + File.separator + "img" + File.separator + "preview.png"));
+                    previewPicLabel.setIcon(new ImageIcon(previewPic.getScaledInstance(120, 214, Image.SCALE_SMOOTH)));
+                } catch (IOException e2) {
+                    // TODO Auto-generated catch block
+                    e2.printStackTrace();
+                }
+            }
+            
         }
 	}
 
