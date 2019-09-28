@@ -22,6 +22,8 @@ import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.time.LocalTime;
+import java.time.format.DateTimeFormatter;
 import java.text.SimpleDateFormat;
 import java.util.List;
 
@@ -66,6 +68,8 @@ public class MainScreen extends JFrame{
 	private JTextField outputFolderTextField;
 
 	private String outputFolderPath;
+	
+	private String startTimeStamp;
 
 	String url;
 	Process videoProcess;
@@ -303,11 +307,11 @@ public class MainScreen extends JFrame{
 	                            SimpleDateFormat df=new SimpleDateFormat("mm:ss");
 	                            timer.setText(df.format(count));
 	                            Thread.sleep(2000);
-	                            Controller.pullVideo(outputFolderTextField.getText() + File.separator + "video.mp4");
+	                            Controller.pullVideo(outputFolderTextField.getText() + File.separator + startTimeStamp + "video.mp4");
 	                            geteventProcess.destroy();
 	                            
-	                            File video = new File(outputFolderTextField.getText() + File.separator + "video.mp4");
-	                            File getevent = new File(outputFolderTextField.getText() + File.separator + "getevent.log");
+	                            File video = new File(outputFolderTextField.getText() + File.separator + startTimeStamp + "video.mp4");
+	                            File getevent = new File(outputFolderTextField.getText() + File.separator + startTimeStamp + "getevent.log");
 
 	                            if(video.exists() && getevent.exists()){
 
@@ -385,10 +389,13 @@ public class MainScreen extends JFrame{
                         	if(!outputFile.mkdirs())
                         		throw new Exception();
                         }
+                        DateTimeFormatter tf = DateTimeFormatter.ofPattern("HH.mm.ss");
+                        LocalTime time = LocalTime.now();
+                        startTimeStamp = "[" + time.format(tf) + "]";
                         startBtn.setEnabled(false);
                         stopBtn.setEnabled(true);
                         videoProcess = Controller.startVideoCapture();
-                        geteventProcess = Controller.startGetEventCapture(outputFolderTextField.getText() + File.separator+ "getevent.log");
+                        geteventProcess = Controller.startGetEventCapture(outputFolderTextField.getText() + File.separator+ startTimeStamp +"getevent.log");
                         loading.setVisible(false);
                         cdTimer.start();
 //                            File screenshot = new File(outputFolderTextField.getText() + File.separator + "screen.png");
