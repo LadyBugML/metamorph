@@ -11,6 +11,7 @@ This is a small GUI-based tool for capturing screen recordings and getevent trac
 *  Simply import the Java project into Eclipse and run the `MainScreen.java` class.
 *  You can also use the pre-packaged applications from the [CI Builds](https://gitlab.com/SEMERU-Code/Android/Android-Video-Recorder/-/artifacts/master/download?job=BuildAVTR).
 *  You can also run `MAVEN_CLI_OPTS: "--batch-mode --errors --fail-at-end --show-version -DinstallAtEnd=true -DdeployAtEnd=true"` and then  `mvn $MAVEN_CLI_OPTS -Dmaven.test.skip=true package` from the root repo folder to create an executable jar.
+*  you may need to give the `adb` exectuables in the `resources` folder permission to execute on your machine in order for the tool to run properly.
 *  **Note that currently the generated jar must be in the same level as the `resources` folder in order to run properly**.
 
 ## Features
