@@ -6,7 +6,7 @@
 
 This is a small GUI-based tool for capturing screen recordings and getevent traces from an Android device that is connected to a PC or Mac. It's written in Java Swing and includes the nessecary Andorid SDK component bundled in to perform the recording process.
 
-## Installation
+## Installation & Use
 
 *  Simply import the Java project into Eclipse and run the `MainScreen.java` class.
 *  You can also use the pre-packaged applications from the [CI Builds](https://gitlab.com/SEMERU-Code/Android/Android-Video-Recorder/-/artifacts/master/download?job=BuildAVTR).
