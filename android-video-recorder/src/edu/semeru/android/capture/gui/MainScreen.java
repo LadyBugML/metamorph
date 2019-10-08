@@ -22,6 +22,8 @@ import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.nio.file.Path;
 import java.nio.file.Paths;
+import java.time.LocalTime;
+import java.time.format.DateTimeFormatter;
 import java.text.SimpleDateFormat;
 import java.util.List;
 
@@ -66,6 +68,8 @@ public class MainScreen extends JFrame{
 	private JTextField outputFolderTextField;
 
 	private String outputFolderPath;
+	
+	private String startTimeStamp;
 
 	String url;
 	Process videoProcess;
@@ -303,11 +307,11 @@ public class MainScreen extends JFrame{
 	                            SimpleDateFormat df=new SimpleDateFormat("mm:ss");
 	                            timer.setText(df.format(count));
 	                            Thread.sleep(2000);
-	                            Controller.pullVideo(outputFolderTextField.getText() + File.separator + "video.mp4");
+	                            Controller.pullVideo(outputFolderTextField.getText() + File.separator + startTimeStamp + "video.mp4");
 	                            geteventProcess.destroy();
 	                            
-	                            File video = new File(outputFolderTextField.getText() + File.separator + "video.mp4");
-	                            File getevent = new File(outputFolderTextField.getText() + File.separator + "getevent.log");
+	                            File video = new File(outputFolderTextField.getText() + File.separator + startTimeStamp + "video.mp4");
+	                            File getevent = new File(outputFolderTextField.getText() + File.separator + startTimeStamp + "getevent.log");
 
 	                            if(video.exists() && getevent.exists()){
 
@@ -332,6 +336,7 @@ public class MainScreen extends JFrame{
 	                            excpetionLabel.setText(sw.toString());
 	                            excpetionLabel.setVisible(true);
 	                            System.out.println(sw.toString());
+	                            done();
 	                        }
 
 	                    }else{
@@ -371,24 +376,28 @@ public class MainScreen extends JFrame{
 	public class startBtnListener implements ActionListener {
 		@Override
 		public void actionPerformed(ActionEvent e) {
-
+			
 		    SwingWorker<String, Void> worker2 = new SwingWorker<String, Void>() {
-
+		    	
                 @Override
                 protected String doInBackground() throws InterruptedException {
+                	//boolean validDir = true;
                     excpetionLabel.setVisible(false);
-                    if(outputFolderTextField.getText() != null && !outputFolderTextField.getText().isEmpty()){
-                        try {
-                            File outputFile = new File(outputFolderTextField.getText());
-                            if(!outputFile.exists()) {
-                                outputFile.mkdirs();
-                            }
-                            startBtn.setEnabled(false);
-                            stopBtn.setEnabled(true);
-                            videoProcess = Controller.startVideoCapture();
-                            geteventProcess = Controller.startGetEventCapture(outputFolderTextField.getText() + File.separator+ "getevent.log");
-                            loading.setVisible(false);
-                            cdTimer.start();
+                    try {
+                        File outputFile = new File(outputFolderTextField.getText());
+                        if(!outputFile.exists()) {
+                        	if(!outputFile.mkdirs())
+                        		throw new Exception();
+                        }
+                        DateTimeFormatter tf = DateTimeFormatter.ofPattern("HH.mm.ss");
+                        LocalTime time = LocalTime.now();
+                        startTimeStamp = "[" + time.format(tf) + "]";
+                        startBtn.setEnabled(false);
+                        stopBtn.setEnabled(true);
+                        videoProcess = Controller.startVideoCapture();
+                        geteventProcess = Controller.startGetEventCapture(outputFolderTextField.getText() + File.separator+ startTimeStamp +"getevent.log");
+                        loading.setVisible(false);
+                        cdTimer.start();
 //                            File screenshot = new File(outputFolderTextField.getText() + File.separator + "screen.png");
 //                            File uiDump = new File(outputFolderTextField.getText() + File.separator + "ui-dump.xml");
 
@@ -409,32 +418,16 @@ public class MainScreen extends JFrame{
 
 //                            }
 
-                        } catch (Exception e2) {
-                            StringWriter sw = new StringWriter();
-                            PrintWriter pw = new PrintWriter(sw);
-                            e2.printStackTrace(pw);
-                            // stack trace as a string
-                            statusLabel.setText("Error Running Analysis! Please check your Settings.");
-                            excpetionLabel.setText(sw.toString());
-                            excpetionLabel.setVisible(true);
-                            System.out.println(sw.toString());
-                        }
-
-                    }else{
-                        System.out.println("Parameters not correct!");
-                        statusLabel.setForeground(Color.RED);
-                        statusLabel.setText("Please Ensure all Fields are Filled!!");
-
-                        BufferedImage previewPic;
-                        try {
-                            previewPic = ImageIO.read(new File("libs" + File.separator + "img" + File.separator + "preview.png"));
-                            previewPicLabel.setIcon(new ImageIcon(previewPic.getScaledInstance(120, 214, Image.SCALE_SMOOTH)));
-                        } catch (IOException e) {
-                            // TODO Auto-generated catch block
-                            e.printStackTrace();
-                        }
-
-
+                    } catch (Exception e2) {
+                        StringWriter sw = new StringWriter();
+                        PrintWriter pw = new PrintWriter(sw);
+                        e2.printStackTrace(pw);
+                        // stack trace as a string
+                        statusLabel.setText("Error Running Analysis! Please check your Settings.");
+                        excpetionLabel.setText(sw.toString());
+                        excpetionLabel.setVisible(true);
+                        System.out.println(sw.toString());
+                        done();
                     }
 
                     return "done";
@@ -442,15 +435,30 @@ public class MainScreen extends JFrame{
                 }
                 @Override
                 protected void done() {
-//                    loading.dispose();
+                    loading.dispose();
                 }
             };
 
-            worker2.execute();
-            statusLabel.setText("Capturing Information...");
-            loading.setLocation(getFrameXCoord(), getFrameYCoord());
-            loading.setVisible(true);
-
+            if(outputFolderTextField.getText() != null && !outputFolderTextField.getText().isEmpty()) {
+                worker2.execute();
+                statusLabel.setText("Capturing Information...");
+                loading.setLocation(getFrameXCoord(), getFrameYCoord());
+                loading.setVisible(true);
+            } else {
+                System.out.println("Parameters not correct!");
+                statusLabel.setForeground(Color.RED);
+                statusLabel.setText("Please Ensure all Fields are Filled!!");
+                
+                BufferedImage previewPic;
+                try {
+                    previewPic = ImageIO.read(new File("libs" + File.separator + "img" + File.separator + "preview.png"));
+                    previewPicLabel.setIcon(new ImageIcon(previewPic.getScaledInstance(120, 214, Image.SCALE_SMOOTH)));
+                } catch (IOException e2) {
+                    // TODO Auto-generated catch block
+                    e2.printStackTrace();
+                }
+            }
+            
         }
 	}
 
