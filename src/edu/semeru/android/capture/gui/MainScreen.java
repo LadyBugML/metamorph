@@ -16,10 +16,6 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.ItemEvent;
 import java.awt.image.BufferedImage;
-import java.io.File;
-import java.io.IOException;
-import java.io.PrintWriter;
-import java.io.StringWriter;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.time.LocalTime;
@@ -52,6 +48,7 @@ import javax.swing.UIManager;
 import javax.swing.border.Border;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
+import java.io.*;
 
 import edu.semeru.android.capture.controller.Controller;
 
@@ -166,7 +163,26 @@ public class MainScreen extends JFrame{
 				statusLabel.setForeground(Color.BLUE);
 			}
 		});
+
+		// Create Button to Extract trace-replayer.jar
+		JButton extractJarBtn = new JButton("Extract trace-replayer");
+		extractJarBtn.setToolTipText("Click to extract trace-replayer.jar from resources");
+
+		// Add an ActionListener to extract the JAR
+		extractJarBtn.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				File extractedJar = extractEmbeddedJar(); // Calls the extraction method
+				if (extractedJar != null) {
+					System.out.println("trace-replayer.jar extracted to: " + extractedJar.getAbsolutePath());
+				} else {
+					System.out.println("Failed to extract trace-replayer.jar.");
+				}
+			}
+		});
 		// TEST END
+
+		
 
 
 		ImageIcon gvtIcon = new ImageIcon("resources/GVT-Logo.png");
@@ -260,7 +276,9 @@ public class MainScreen extends JFrame{
 		c.gridy = 13; // Place the button on a new row below the others
 		toolPane.add(dummyBtn, c);
 
-
+		c.gridx = 3; // Adjust the x-coordinate for positioning
+		c.gridy = 13; // Place the button on a new row below the others
+		toolPane.add(extractJarBtn, c);
 
 		statusLabel = new JLabel("Current Status: Awaiting Capture");
 		c.gridx = 0;
@@ -543,7 +561,35 @@ public class MainScreen extends JFrame{
 		return y;
 	}
 
+	private File extractEmbeddedJar() {
+		try {
+			// Load the JAR from resources folder
+			InputStream jarStream = getClass().getClassLoader().getResourceAsStream("trace-replayer.jar");
+			if (jarStream == null) {
+				throw new IOException("JAR resource not found: trace-replayer.jar");
+			}
 	
+			// Create a temporary file for the extracted JAR
+			File tempJar = File.createTempFile("trace-replayer-", ".jar");
+			tempJar.deleteOnExit();
+	
+			// Write JAR data to the temp file
+			try (FileOutputStream out = new FileOutputStream(tempJar)) {
+				byte[] buffer = new byte[1024];
+				int bytesRead;
+				while ((bytesRead = jarStream.read(buffer)) != -1) {
+					out.write(buffer, 0, bytesRead);
+				}
+			}
+	
+			System.out.println("Extracted JAR to: " + tempJar.getAbsolutePath());
+			return tempJar;
+	
+		} catch (IOException e) {
+			e.printStackTrace();
+			return null;
+		}
+	}
 	
 	public static void main(String[] args) {
 
