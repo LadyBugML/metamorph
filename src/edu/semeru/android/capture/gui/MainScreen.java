@@ -82,6 +82,8 @@ public class MainScreen extends JFrame{
 	private JLabel timer;
 	JButton startBtn;
 	JButton stopBtn;
+	JButton dummyBtn; // test
+
 	JLabel previewPicLabel;
 	private JTextArea excpetionLabel;
 	private int count = 180000;
@@ -149,6 +151,23 @@ public class MainScreen extends JFrame{
         stopBtn.setToolTipText("Click Here to to stop the capture process.");
         stopBtn.addActionListener(new stopBtnListener());
         stopBtn.setEnabled(false);
+
+
+		// TEST START
+		// Initialize the Dummy Button
+		dummyBtn = new JButton("Dummy Button");
+		dummyBtn.setToolTipText("This is a dummy button with no real functionality.");
+
+		// Add an ActionListener to handle button clicks
+		dummyBtn.addActionListener(new ActionListener() {
+			@Override
+			public void actionPerformed(ActionEvent e) {
+				statusLabel.setText("Dummy Button Clicked!");
+				statusLabel.setForeground(Color.BLUE);
+			}
+		});
+		// TEST END
+
 
 		ImageIcon gvtIcon = new ImageIcon("resources/GVT-Logo.png");
 		
@@ -236,6 +255,11 @@ public class MainScreen extends JFrame{
         c.gridy = 13;
 		c.gridwidth = 1;
         toolPane.add(stopBtn, c);
+
+		c.gridx = 2; // Adjust the x-coordinate for positioning
+		c.gridy = 13; // Place the button on a new row below the others
+		toolPane.add(dummyBtn, c);
+
 
 
 		statusLabel = new JLabel("Current Status: Awaiting Capture");
