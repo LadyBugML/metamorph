@@ -4,7 +4,7 @@
 	<groupId>Android-VCT</groupId>
 	<artifactId>AVTR</artifactId>
 	<version>1.0</version>
-	<name>GVT</name>
+	<name>ACT</name>
 	<repositories>
 		<!--other repositories if any -->
 		<repository>

@@ -66,8 +66,10 @@ public class MainScreen extends JFrame{
 	private GridBagConstraints c;
 
 	private JTextField outputFolderTextField;
+	private JTextField adbTextField;
 
 	private String outputFolderPath;
+	private String adbPath;
 	
 	private String startTimeStamp;
 
@@ -106,6 +108,7 @@ public class MainScreen extends JFrame{
 		//Set up Text Fields for the Paths to Information needed by the GVT
 
 		outputFolderTextField = new JTextField(10);
+		adbTextField = new JTextField(10);
 		excpetionLabel = new JTextArea(50,50);
 
 
@@ -121,6 +124,7 @@ public class MainScreen extends JFrame{
 		//Set Up Labels for the Text Fields and Buttons
 
 		JLabel outputPathLabel = new JLabel("Output Path:");
+		JLabel adbPathLabel = new JLabel("ADB Path:");
 		JLabel versionNumberLabel = new JLabel("v0.1");
 		timer = new JLabel("3:00");
 		timerLabel = new JLabel("Video Time Remaining:");
@@ -133,6 +137,9 @@ public class MainScreen extends JFrame{
 
 		JButton outputFolderSelectorBtn = new JButton();
 		outputFolderSelectorBtn.addActionListener(new OutputFolderSelectorBtnListener());
+		
+	    JButton adbSelectorBtn = new JButton();
+	    adbSelectorBtn.addActionListener(new adbBtnListener());
 		
 		startBtn = new JButton("Start Capture");
 		startBtn.setToolTipText("Click Here to capture a video recording and replayable script of actions on your android device.");
@@ -149,6 +156,7 @@ public class MainScreen extends JFrame{
 			Image img = ImageIO.read(new File("resources/File-Open.png"));
 			img = img.getScaledInstance(25, 25, Image.SCALE_DEFAULT);
 			outputFolderSelectorBtn.setIcon(new ImageIcon(img));
+			adbSelectorBtn.setIcon(new ImageIcon(img));
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -192,6 +200,22 @@ public class MainScreen extends JFrame{
 		c.gridy = 1;
 		c.weightx=1;
 		toolPane.add(outputFolderSelectorBtn, c);
+		
+	    c.gridx = 0;
+	    c.gridy = 2;
+	    c.gridwidth = 2;
+	    toolPane.add(adbPathLabel,c);
+		
+	    c.gridx = 0;
+	    c.gridy = 3;
+	    c.weightx = 1;
+	    c.gridwidth = 1;
+	    toolPane.add(adbTextField, c);
+	    
+	    c.gridx = 1;
+	    c.gridy = 3;
+	    c.weightx=1;
+	    toolPane.add(adbSelectorBtn, c);
 
 		//----------------------------------------------------
 
@@ -286,6 +310,22 @@ public class MainScreen extends JFrame{
 
 		}
 	}
+	
+	   public class adbBtnListener implements ActionListener {
+	        @Override
+	        public void actionPerformed(ActionEvent e) {
+
+	            JFileChooser fc = new JFileChooser();
+
+	            fc.setFileSelectionMode(JFileChooser.FILES_AND_DIRECTORIES);
+	            fc.showOpenDialog(MainScreen.this);
+	            if (fc.getSelectedFile() != null){
+	                adbPath = fc.getSelectedFile().getAbsolutePath();
+	                adbTextField.setText(adbPath);
+	            }
+
+	        }
+	    }
 
 	   public class stopBtnListener implements ActionListener {
 	        @Override
@@ -299,16 +339,18 @@ public class MainScreen extends JFrame{
 	                    if(outputFolderTextField.getText() != null && !outputFolderTextField.getText().isEmpty()){
 	                        try {
 
+	                            Thread.sleep(4000);
 	                            videoProcess.destroy();
+	                            geteventProcess.destroy();
 	                            startBtn.setEnabled(true);
 	                            stopBtn.setEnabled(false);
 	                            cdTimer.stop();
 	                            count=180000; 
+	                            Thread.sleep(3000);
 	                            SimpleDateFormat df=new SimpleDateFormat("mm:ss");
 	                            timer.setText(df.format(count));
-	                            Thread.sleep(2000);
-	                            Controller.pullVideo(outputFolderTextField.getText() + File.separator + startTimeStamp + "video.mp4");
-	                            geteventProcess.destroy();
+	                            Controller.pullVideo(outputFolderTextField.getText() + File.separator + startTimeStamp + "video.mp4", adbTextField.getText());
+	                            
 	                            
 	                            File video = new File(outputFolderTextField.getText() + File.separator + startTimeStamp + "video.mp4");
 	                            File getevent = new File(outputFolderTextField.getText() + File.separator + startTimeStamp + "getevent.log");
@@ -394,8 +436,8 @@ public class MainScreen extends JFrame{
                         startTimeStamp = "[" + time.format(tf) + "]";
                         startBtn.setEnabled(false);
                         stopBtn.setEnabled(true);
-                        videoProcess = Controller.startVideoCapture();
-                        geteventProcess = Controller.startGetEventCapture(outputFolderTextField.getText() + File.separator+ startTimeStamp +"getevent.log");
+                        videoProcess = Controller.startVideoCapture(adbTextField.getText());
+                        geteventProcess = Controller.startGetEventCapture(outputFolderTextField.getText() + File.separator+ startTimeStamp +"getevent.log", adbTextField.getText());
                         loading.setVisible(false);
                         cdTimer.start();
 //                            File screenshot = new File(outputFolderTextField.getText() + File.separator + "screen.png");

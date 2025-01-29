@@ -112,7 +112,7 @@ public class Controller {
         System.out.println(output2);
     }
 
-    public static Process startVideoCapture()
+    public static Process startVideoCapture(String adbPath)
             throws InterruptedException, IOException {
 
         String androidSDKPath = getAndroidSDKPath();
@@ -121,10 +121,10 @@ public class Controller {
 
         System.out.println("Capturing Screenshot...");
         if (SystemUtils.IS_OS_MAC || SystemUtils.IS_OS_LINUX) {
-            uiCommand1 = new String[] { androidSDKPath + File.separator + "platform-tools" + File.separator + "adb",
+            uiCommand1 = new String[] { adbPath,
                     "shell", "screenrecord", "/sdcard/video.mp4", "--bit-rate", "8000000" };
         } else {
-            uiCommand1 = new String[] { androidSDKPath + File.separator + "platform-tools" + File.separator + "adb.exe",
+            uiCommand1 = new String[] { adbPath,
                     "shell", "screenrecord", "/sdcard/video.mp4", "--bit-rate", "8000000" };
 
         }
@@ -143,7 +143,7 @@ public class Controller {
         // System.out.println(output2);
     }
     
-    public static void pullVideo(String outputFile)
+    public static void pullVideo(String outputFile, String adbPath)
             throws InterruptedException, IOException {
 
         String androidSDKPath = getAndroidSDKPath();
@@ -153,11 +153,11 @@ public class Controller {
         System.out.println("Capturing Screenshot...");
         if (SystemUtils.IS_OS_MAC || SystemUtils.IS_OS_LINUX) {
             System.out.println("Saving Screenshot to specified File path...");
-            uiCommand2 = new String[] { androidSDKPath + File.separator + "platform-tools" + File.separator + "adb",
+            uiCommand2 = new String[] {adbPath,
                     "pull", "/sdcard/video.mp4", outputFile };
         } else {
             System.out.println("Saving Screenshot to specified File path...");
-            uiCommand2 = new String[] { androidSDKPath + File.separator + "platform-tools" + File.separator + "adb.exe",
+            uiCommand2 = new String[] { adbPath,
                     "pull", "/sdcard/video.mp4", outputFile };
 
         }
@@ -169,7 +169,7 @@ public class Controller {
          System.out.println(output2);
     }
     
-    public static Process startGetEventCapture(String outputPath)
+    public static Process startGetEventCapture(String outputPath, String adbPath)
             throws InterruptedException, IOException {
 
         String androidSDKPath = getAndroidSDKPath();
@@ -178,10 +178,10 @@ public class Controller {
 
         System.out.println("Capturing getevent...");
         if (SystemUtils.IS_OS_MAC || SystemUtils.IS_OS_LINUX) {
-            uiCommand1 = new String[] { androidSDKPath + File.separator + "platform-tools" + File.separator + "adb",
+            uiCommand1 = new String[] { adbPath,
                     "shell", "getevent", "-t"};
         } else {
-            uiCommand1 = new String[] { androidSDKPath + File.separator + "platform-tools" + File.separator + "adb.exe",
+            uiCommand1 = new String[] {adbPath,
                     "shell", "getevent", "-t"};
 
         }
