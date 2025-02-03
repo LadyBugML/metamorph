@@ -54,6 +54,7 @@ import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 
 import edu.semeru.android.capture.controller.Controller;
+import edu.semeru.android.capture.gui.TraceReplayerPanel;
 
 /**
  * @author KevinMoran
@@ -82,7 +83,7 @@ public class MainScreen extends JFrame{
 	private JLabel timer;
 	JButton startBtn;
 	JButton stopBtn;
-	JButton dummyBtn; // test
+	JButton nextBtn; // test
 
 	JLabel previewPicLabel;
 	private JTextArea excpetionLabel;
@@ -147,7 +148,7 @@ public class MainScreen extends JFrame{
 		startBtn.setToolTipText("Click Here to capture a video recording and replayable script of actions on your android device.");
 		startBtn.addActionListener(new startBtnListener());
 		
-		stopBtn = new JButton("End Catpure");
+		stopBtn = new JButton("End Capture");
         stopBtn.setToolTipText("Click Here to to stop the capture process.");
         stopBtn.addActionListener(new stopBtnListener());
         stopBtn.setEnabled(false);
@@ -155,17 +156,12 @@ public class MainScreen extends JFrame{
 
 		// TEST START
 		// Initialize the Dummy Button
-		dummyBtn = new JButton("Dummy Button");
-		dummyBtn.setToolTipText("This is a dummy button with no real functionality.");
+		nextBtn = new JButton("Next");
+		nextBtn.setToolTipText("This is a dummy button with no real functionality.");
+        nextBtn.setEnabled(false);
 
 		// Add an ActionListener to handle button clicks
-		dummyBtn.addActionListener(new ActionListener() {
-			@Override
-			public void actionPerformed(ActionEvent e) {
-				statusLabel.setText("Dummy Button Clicked!");
-				statusLabel.setForeground(Color.BLUE);
-			}
-		});
+		nextBtn.addActionListener(new nextBtnListener());
 		// TEST END
 
 
@@ -207,7 +203,7 @@ public class MainScreen extends JFrame{
 		c.gridx = 0;
 		c.gridy = 0;
 		c.gridwidth = 2;
-		toolPane.add(outputPathLabel,c);
+		toolPane.add(outputPathLabel, c);
 
 		c.gridx = 0;
 		c.gridy = 1;
@@ -217,7 +213,7 @@ public class MainScreen extends JFrame{
 
 		c.gridx = 1;
 		c.gridy = 1;
-		c.weightx=1;
+		c.weightx = 1;
 		toolPane.add(outputFolderSelectorBtn, c);
 		
 	    c.gridx = 0;
@@ -233,7 +229,7 @@ public class MainScreen extends JFrame{
 	    
 	    c.gridx = 1;
 	    c.gridy = 3;
-	    c.weightx=1;
+	    c.weightx = 1;
 	    toolPane.add(adbSelectorBtn, c);
 
 		//----------------------------------------------------
@@ -246,7 +242,7 @@ public class MainScreen extends JFrame{
 		c.anchor = GridBagConstraints.CENTER;
 		c.gridx = 0;
 		c.gridy = 13;
-		c.weightx=1;
+		c.weightx = 1;
 		c.fill = GridBagConstraints.NONE;
 		c.gridwidth = 1;
 		toolPane.add(startBtn, c);
@@ -254,13 +250,14 @@ public class MainScreen extends JFrame{
 		c.gridx = 1;
         c.gridy = 13;
 		c.gridwidth = 1;
+        c.weightx = 1;
         toolPane.add(stopBtn, c);
 
 		c.gridx = 2; // Adjust the x-coordinate for positioning
 		c.gridy = 13; // Place the button on a new row below the others
-		toolPane.add(dummyBtn, c);
-
-
+        c.gridwidth = 1;
+        c.weightx = 1;
+		toolPane.add(nextBtn, c);
 
 		statusLabel = new JLabel("Current Status: Awaiting Capture");
 		c.gridx = 0;
@@ -275,9 +272,9 @@ public class MainScreen extends JFrame{
         c.gridy = 15;
         toolPane.add(timer, c);
 
-		c.gridx = 2;
+		c.gridx = 3;
 		c.gridy = 41;
-		c.weightx=1;
+		c.weightx = 1;
 		toolPane.add(versionNumberLabel, c);
 
 		excpetionLabel.setVisible(false);
@@ -302,9 +299,17 @@ public class MainScreen extends JFrame{
 		loading.setLocationRelativeTo(this);
 		loading.setDefaultCloseOperation(JDialog.DO_NOTHING_ON_CLOSE);
 		loading.setModal(true);
-		
-
 	}
+
+    private void loadTraceReplayerPanel() {
+        TraceReplayerPanel t = new TraceReplayerPanel(outputFolderPath);
+		JScrollPane scrPane = new JScrollPane(t);
+		Border padding = BorderFactory.createEmptyBorder(2, 4, 2, 4);
+		scrPane.setBorder(padding);
+
+		setContentPane(scrPane);
+        pack();
+    }
 
 	 public class TimerListener implements ActionListener {
 
@@ -331,7 +336,6 @@ public class MainScreen extends JFrame{
 				outputFolderPath = fc.getSelectedFile().getAbsolutePath();
 				outputFolderTextField.setText(outputFolderPath);
 			}
-
 		}
 	}
 	
@@ -383,6 +387,7 @@ public class MainScreen extends JFrame{
 
 	                                statusLabel.setForeground(Color.GREEN);
 	                                statusLabel.setText("Capture Complete!");
+                                    nextBtn.setEnabled(true);
 
 	                            }else{
 	                                statusLabel.setForeground(Color.RED);
@@ -528,6 +533,16 @@ public class MainScreen extends JFrame{
         }
 	}
 
+    // Swaps over to a screen that collects all the necessary trace replayer information
+    public class nextBtnListener implements ActionListener {
+        @Override
+        public void actionPerformed(ActionEvent e) {
+            loadTraceReplayerPanel();
+            revalidate();
+            repaint();
+        }
+    }
+
 
 	public int getFrameXCoord(){
 		int x =0;  
@@ -561,6 +576,4 @@ public class MainScreen extends JFrame{
 
 		//getignoredDimensions(defaultIgnored);
 	}
-
-
 }
