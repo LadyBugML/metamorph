@@ -32,6 +32,7 @@
 package edu.semeru.android.capture.controller;
 
 import java.io.File;
+import java.io.FileWriter;
 import java.io.IOException;
 import java.lang.reflect.Field;
 
@@ -269,4 +270,17 @@ public class Controller {
         return result;
     }
 
+    public static void createConfigFile(String androidSdkPath, String aaptPath, String apkPath,
+                                        String outputPath, int avdPort, int adbPort, int executionNum) throws IOException{
+        FileWriter configFileWriter = new FileWriter(outputPath + "/config.yaml");
+        configFileWriter.write("androidSDKPath: " + androidSdkPath);
+        configFileWriter.write("pythonScriptsPath: ");
+        configFileWriter.write("aaptPath: " + aaptPath);
+        configFileWriter.write("apkPath: " + apkPath);
+        configFileWriter.write("getEventFile: ");
+        configFileWriter.write("outputFolder: " + outputPath);
+        configFileWriter.write("avdPort: " + avdPort);
+        configFileWriter.write("adbPort: " + adbPort);
+        configFileWriter.write("executionNum: " + executionNum);
+    }
 }

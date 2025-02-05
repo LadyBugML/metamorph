@@ -29,6 +29,7 @@ import java.util.List;
 
 import javax.imageio.ImageIO;
 import javax.swing.BorderFactory;
+import javax.swing.BoxLayout;
 import javax.swing.GroupLayout;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
@@ -60,9 +61,10 @@ import edu.semeru.android.capture.gui.TraceReplayerPanel;
  * @author KevinMoran
  *
  */
-public class MainScreen extends JFrame{
-
+public class MainScreen extends JFrame {
+	private JPanel mainPanel;
 	private JPanel toolPane;
+	private JPanel extraPanel;
 	JLabel implementationSrcLabel;
 	private GridBagConstraints c;
 
@@ -84,6 +86,7 @@ public class MainScreen extends JFrame{
 	JButton startBtn;
 	JButton stopBtn;
 	JButton nextBtn; // test
+	JButton backBtn;
 
 	JLabel previewPicLabel;
 	private JTextArea excpetionLabel;
@@ -104,10 +107,7 @@ public class MainScreen extends JFrame{
 		initializeGUI();
 	}
 
-	private void initializeGUI() throws IOException{
-
-
-
+	private void initializeGUI() throws IOException {
 		//Set up Text Fields for the Paths to Information needed by the GVT
 
 		outputFolderTextField = new JTextField(10);
@@ -153,17 +153,17 @@ public class MainScreen extends JFrame{
         stopBtn.addActionListener(new stopBtnListener());
         stopBtn.setEnabled(false);
 
-
-		// TEST START
-		// Initialize the Dummy Button
 		nextBtn = new JButton("Next");
-		nextBtn.setToolTipText("This is a dummy button with no real functionality.");
-        nextBtn.setEnabled(false);
-
-		// Add an ActionListener to handle button clicks
+		nextBtn.setToolTipText("Click here to start the Trace Replayer process.");
+        nextBtn.setEnabled(true);
 		nextBtn.addActionListener(new nextBtnListener());
-		// TEST END
 
+		backBtn = new JButton("Back");
+        backBtn.setEnabled(false);
+		backBtn.addActionListener(new backBtnListener());
+
+		
+		// TEST END
 
 		ImageIcon gvtIcon = new ImageIcon("resources/GVT-Logo.png");
 		
@@ -177,17 +177,22 @@ public class MainScreen extends JFrame{
 			e.printStackTrace();
 		}
 
-		JTabbedPane tabbedPane = new JTabbedPane();
-
-		setContentPane(tabbedPane);
+		///JTabbedPane tabbedPane = new JTabbedPane();
+		//setContentPane(tabbedPane);
 
 		toolPane = new JPanel(new GridBagLayout());
+		extraPanel = new JPanel(new GridBagLayout());
+		mainPanel = new JPanel();
+		mainPanel.setLayout(new BoxLayout(mainPanel, BoxLayout.Y_AXIS));
+		
 		JScrollPane scrPane = new JScrollPane(toolPane);
 		Border padding = BorderFactory.createEmptyBorder(2, 4, 2, 4);
 		scrPane.setBorder(padding);
 
+		mainPanel.add(toolPane);
+		mainPanel.add(extraPanel);
 
-		setContentPane(scrPane);
+		add(mainPanel);
 		
 	    cdTimer = new Timer(1000, new TimerListener());
 	    cdTimer.setInitialDelay(0);
@@ -282,13 +287,16 @@ public class MainScreen extends JFrame{
 		c.gridy = 42;
 		toolPane.add(excpetionLabel, c);
 
+		c.gridx = 0;
+		c.gridy = 0;
+		extraPanel.add(backBtn);
+
 
 		setTitle("Android Video Capture Tool");
 		setIconImage(gvtIcon.getImage());
 		pack();
 		setLocationRelativeTo(null);
 		setDefaultCloseOperation(EXIT_ON_CLOSE);
-
 
 		loading = new JDialog(this);
 		JPanel p1 = new JPanel();
@@ -538,6 +546,18 @@ public class MainScreen extends JFrame{
         @Override
         public void actionPerformed(ActionEvent e) {
             loadTraceReplayerPanel();
+            revalidate();
+            repaint();
+			backBtn.setEnabled(true);
+        }
+    }
+
+	public class backBtnListener implements ActionListener {
+        @Override
+        public void actionPerformed(ActionEvent e) {
+			setContentPane(toolPane);
+			nextBtn.setEnabled(false);
+			backBtn.setEnabled(false);
             revalidate();
             repaint();
         }

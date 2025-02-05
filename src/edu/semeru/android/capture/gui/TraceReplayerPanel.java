@@ -56,6 +56,8 @@ import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 import javax.swing.filechooser.FileNameExtensionFilter;
 
+import edu.semeru.android.capture.gui.MainScreen;
+
 public class TraceReplayerPanel extends JPanel {
     private GridBagConstraints c;
     private JTextField androidSdkPathField;
