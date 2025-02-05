@@ -163,26 +163,7 @@ public class MainScreen extends JFrame{
 				statusLabel.setForeground(Color.BLUE);
 			}
 		});
-
-		// Create Button to Extract trace-replayer.jar
-		JButton extractJarBtn = new JButton("Extract trace-replayer");
-		extractJarBtn.setToolTipText("Click to extract trace-replayer.jar from resources");
-
-		// Add an ActionListener to extract the JAR
-		extractJarBtn.addActionListener(new ActionListener() {
-			@Override
-			public void actionPerformed(ActionEvent e) {
-				File extractedJar = extractEmbeddedJar(); // Calls the extraction method
-				if (extractedJar != null) {
-					System.out.println("trace-replayer.jar extracted to: " + extractedJar.getAbsolutePath());
-				} else {
-					System.out.println("Failed to extract trace-replayer.jar.");
-				}
-			}
-		});
 		// TEST END
-
-		
 
 
 		ImageIcon gvtIcon = new ImageIcon("resources/GVT-Logo.png");
@@ -275,10 +256,6 @@ public class MainScreen extends JFrame{
 		c.gridx = 2; // Adjust the x-coordinate for positioning
 		c.gridy = 13; // Place the button on a new row below the others
 		toolPane.add(dummyBtn, c);
-
-		c.gridx = 3; // Adjust the x-coordinate for positioning
-		c.gridy = 13; // Place the button on a new row below the others
-		toolPane.add(extractJarBtn, c);
 
 		statusLabel = new JLabel("Current Status: Awaiting Capture");
 		c.gridx = 0;
@@ -561,6 +538,7 @@ public class MainScreen extends JFrame{
 		return y;
 	}
 
+	// This works for sure
 	private File extractEmbeddedJar() {
 		try {
 			// Load the JAR from resources folder
@@ -590,6 +568,46 @@ public class MainScreen extends JFrame{
 			return null;
 		}
 	}
+	
+	// Needs more testing witha actual config file, not sure where the output of the JAR goes?
+	private void runJarWithConfig(File configFile) {
+		File extractedJar = extractEmbeddedJar(); // Extract JAR
+		if (extractedJar == null) {
+			System.err.println("Failed to extract JAR.");
+			return;
+		}
+	
+		if (configFile == null || !configFile.exists()) {
+			System.err.println("Config file is missing. JAR execution aborted.");
+			return;
+		}
+	
+		try {
+			System.out.println("Running JAR with config: " + configFile.getAbsolutePath());
+			
+			ProcessBuilder processBuilder = new ProcessBuilder(
+				"java", "-jar", extractedJar.getAbsolutePath(), "--config", configFile.getAbsolutePath()
+			);
+			processBuilder.redirectErrorStream(true);
+			Process process = processBuilder.start();
+	
+			// Capture and print JAR output
+			try (BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()))) {
+				String line;
+				while ((line = reader.readLine()) != null) {
+					System.out.println("JAR Output: " + line);
+				}
+			}
+	
+			int exitCode = process.waitFor();
+			System.out.println("JAR Execution Finished with exit code: " + exitCode);
+		} catch (IOException | InterruptedException ex) {
+			ex.printStackTrace();
+		}
+	}
+	
+	
+	
 	
 	public static void main(String[] args) {
 
