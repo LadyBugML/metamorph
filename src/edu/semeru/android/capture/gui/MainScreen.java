@@ -16,10 +16,6 @@ import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.ItemEvent;
 import java.awt.image.BufferedImage;
-import java.io.File;
-import java.io.IOException;
-import java.io.PrintWriter;
-import java.io.StringWriter;
 import java.nio.file.Path;
 import java.nio.file.Paths;
 import java.time.LocalTime;
@@ -53,6 +49,7 @@ import javax.swing.UIManager;
 import javax.swing.border.Border;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
+import java.io.*;
 
 import edu.semeru.android.capture.controller.Controller;
 import edu.semeru.android.capture.gui.TraceReplayerPanel;
@@ -578,6 +575,75 @@ public class MainScreen extends JFrame {
 		return y;
 	}
 
+	// This works for sure
+	private File extractEmbeddedJar() {
+		try {
+			// Load the JAR from resources folder
+			InputStream jarStream = getClass().getClassLoader().getResourceAsStream("trace-replayer.jar");
+			if (jarStream == null) {
+				throw new IOException("JAR resource not found: trace-replayer.jar");
+			}
+	
+			// Create a temporary file for the extracted JAR
+			File tempJar = File.createTempFile("trace-replayer-", ".jar");
+			tempJar.deleteOnExit();
+	
+			// Write JAR data to the temp file
+			try (FileOutputStream out = new FileOutputStream(tempJar)) {
+				byte[] buffer = new byte[1024];
+				int bytesRead;
+				while ((bytesRead = jarStream.read(buffer)) != -1) {
+					out.write(buffer, 0, bytesRead);
+				}
+			}
+	
+			System.out.println("Extracted JAR to: " + tempJar.getAbsolutePath());
+			return tempJar;
+	
+		} catch (IOException e) {
+			e.printStackTrace();
+			return null;
+		}
+	}
+	
+	// Needs more testing witha actual config file, not sure where the output of the JAR goes?
+	private void runJarWithConfig(File configFile) {
+		File extractedJar = extractEmbeddedJar(); // Extract JAR
+		if (extractedJar == null) {
+			System.err.println("Failed to extract JAR.");
+			return;
+		}
+	
+		if (configFile == null || !configFile.exists()) {
+			System.err.println("Config file is missing. JAR execution aborted.");
+			return;
+		}
+	
+		try {
+			System.out.println("Running JAR with config: " + configFile.getAbsolutePath());
+			
+			ProcessBuilder processBuilder = new ProcessBuilder(
+				"java", "-jar", extractedJar.getAbsolutePath(), "--config", configFile.getAbsolutePath()
+			);
+			processBuilder.redirectErrorStream(true);
+			Process process = processBuilder.start();
+	
+			// Capture and print JAR output
+			try (BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()))) {
+				String line;
+				while ((line = reader.readLine()) != null) {
+					System.out.println("JAR Output: " + line);
+				}
+			}
+	
+			int exitCode = process.waitFor();
+			System.out.println("JAR Execution Finished with exit code: " + exitCode);
+		} catch (IOException | InterruptedException ex) {
+			ex.printStackTrace();
+		}
+	}
+	
+	
 	
 	
 	public static void main(String[] args) {
