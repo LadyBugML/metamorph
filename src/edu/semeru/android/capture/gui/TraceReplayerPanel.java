@@ -24,6 +24,7 @@ import java.nio.file.Paths;
 import java.time.LocalTime;
 import java.time.format.DateTimeFormatter;
 import java.text.NumberFormat;
+import java.text.ParseException;
 import java.text.SimpleDateFormat;
 import java.util.List;
 
@@ -56,7 +57,7 @@ import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 import javax.swing.filechooser.FileNameExtensionFilter;
 
-import edu.semeru.android.capture.gui.MainScreen;
+import edu.semeru.android.capture.controller.Controller;
 
 public class TraceReplayerPanel extends JPanel {
     private GridBagConstraints c;
@@ -100,7 +101,6 @@ public class TraceReplayerPanel extends JPanel {
         JLabel avdPortLabel = new JLabel("AVD Emulator Port Number (Default is 5554):");
         JLabel adbPortLabel = new JLabel("ADB Server Port Number (Default is 5037):");
         JLabel executionNumLabel = new JLabel("(Optional) Execution Number (Default is 1):");
-        JLabel versionNumberLabel = new JLabel("v0.1");
         statusLabel = new JLabel("");
         
         JButton androidSdkPathSelectorBtn = new JButton();
@@ -206,11 +206,6 @@ public class TraceReplayerPanel extends JPanel {
 		c.gridy++;
         c.weightx = 1;
 		this.add(statusLabel, c);
-
-        c.gridx = 2;
-		c.gridy = 41;
-		c.weightx = 1;
-		this.add(versionNumberLabel, c);
     }
 
     public class androidSdkPathBtnListener implements ActionListener {
@@ -236,7 +231,7 @@ public class TraceReplayerPanel extends JPanel {
 
 			fc.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
 			fc.showOpenDialog(TraceReplayerPanel.this);
-			if (fc.getSelectedFile() != null){
+			if (fc.getSelectedFile() != null) {
 				aaptPath = fc.getSelectedFile().getAbsolutePath();
 				aaptPathField.setText(aaptPath);
 			}
@@ -272,7 +267,27 @@ public class TraceReplayerPanel extends JPanel {
                     }
                 }
             }
-            statusLabel.setForeground(Color.BLACK);
+            
+            int avdPortNumber;
+            int adbPortNumber;
+            int executionNumber;
+            try {
+                avdPortNumber = Integer.parseInt(avdPortField.getText());
+                adbPortNumber = Integer.parseInt(adbPortField.getText());
+                executionNumber = Integer.parseInt(executionNumField.getText());
+            } catch (NumberFormatException ex) {
+                ex.printStackTrace();
+                statusLabel.setForeground(Color.RED);
+                statusLabel.setText("Invalid input!");
+                return;
+            }
+            try {
+                Controller.createConfigFile(androidSdkPathField.getText(), aaptPathField.getText(), apkPathField.getText(), outputPath,
+                                            avdPortNumber, adbPortNumber, executionNumber);
+            } catch (IOException ex) {
+                ex.printStackTrace();
+            }
+            statusLabel.setForeground(Color.GREEN);
             statusLabel.setText("Ready!");
 		}
     }

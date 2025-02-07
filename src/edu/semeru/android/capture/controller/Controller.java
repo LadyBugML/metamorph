@@ -271,16 +271,17 @@ public class Controller {
     }
 
     public static void createConfigFile(String androidSdkPath, String aaptPath, String apkPath,
-                                        String outputPath, int avdPort, int adbPort, int executionNum) throws IOException{
+                                        String outputPath, int avdPort, int adbPort, int executionNum) throws IOException {
         FileWriter configFileWriter = new FileWriter(outputPath + "/config.yaml");
-        configFileWriter.write("androidSDKPath: " + androidSdkPath);
-        configFileWriter.write("pythonScriptsPath: ");
-        configFileWriter.write("aaptPath: " + aaptPath);
-        configFileWriter.write("apkPath: " + apkPath);
-        configFileWriter.write("getEventFile: ");
-        configFileWriter.write("outputFolder: " + outputPath);
-        configFileWriter.write("avdPort: " + avdPort);
-        configFileWriter.write("adbPort: " + adbPort);
-        configFileWriter.write("executionNum: " + executionNum);
+        configFileWriter.write("androidSDKPath: " + androidSdkPath + "\n");
+        configFileWriter.write("pythonScriptsPath: " + "\n");
+        configFileWriter.write("aaptPath: " + aaptPath + "\n");
+        configFileWriter.write("apkPath: " + apkPath + "\n");
+        configFileWriter.write("getEventFile: " + "\n");
+        configFileWriter.write("outputFolder: " + outputPath + "\n");
+        configFileWriter.write("avdPort: " + avdPort + "\n");
+        configFileWriter.write("adbPort: " + adbPort + "\n");
+        configFileWriter.write("executionNum: " + executionNum + "\n");
+        configFileWriter.close();
     }
 }

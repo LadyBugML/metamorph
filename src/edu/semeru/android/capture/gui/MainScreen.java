@@ -158,7 +158,7 @@ public class MainScreen extends JFrame {
         nextBtn.setEnabled(true);
 		nextBtn.addActionListener(new nextBtnListener());
 
-		backBtn = new JButton("Back");
+		backBtn = new JButton("←");
         backBtn.setEnabled(false);
 		backBtn.addActionListener(new backBtnListener());
 
@@ -189,8 +189,8 @@ public class MainScreen extends JFrame {
 		Border padding = BorderFactory.createEmptyBorder(2, 4, 2, 4);
 		scrPane.setBorder(padding);
 
-		mainPanel.add(toolPane);
 		mainPanel.add(extraPanel);
+		mainPanel.add(toolPane);
 
 		add(mainPanel);
 		
@@ -277,20 +277,21 @@ public class MainScreen extends JFrame {
         c.gridy = 15;
         toolPane.add(timer, c);
 
-		c.gridx = 3;
-		c.gridy = 41;
-		c.weightx = 1;
-		toolPane.add(versionNumberLabel, c);
-
 		excpetionLabel.setVisible(false);
 		c.gridx = 0;
 		c.gridy = 42;
 		toolPane.add(excpetionLabel, c);
 
-		c.gridx = 0;
-		c.gridy = 0;
-		extraPanel.add(backBtn);
+		c.gridx = 2;
+		c.gridy = 42;
+		c.weightx = 1;
+		toolPane.add(versionNumberLabel, c);
 
+		c.anchor = GridBagConstraints.LINE_START;
+		c.gridx = -1;
+		c.gridy = 0;
+		c.weightx = 2;
+		extraPanel.add(backBtn, c);
 
 		setTitle("Android Video Capture Tool");
 		setIconImage(gvtIcon.getImage());
@@ -310,12 +311,17 @@ public class MainScreen extends JFrame {
 	}
 
     private void loadTraceReplayerPanel() {
-        TraceReplayerPanel t = new TraceReplayerPanel(outputFolderPath);
+        TraceReplayerPanel t = new TraceReplayerPanel(outputFolderTextField.getText());
 		JScrollPane scrPane = new JScrollPane(t);
 		Border padding = BorderFactory.createEmptyBorder(2, 4, 2, 4);
 		scrPane.setBorder(padding);
 
-		setContentPane(scrPane);
+		mainPanel.removeAll();
+		mainPanel.add(extraPanel);
+		mainPanel.add(scrPane);
+
+		repaint();
+		revalidate();
         pack();
     }
 
@@ -555,11 +561,15 @@ public class MainScreen extends JFrame {
 	public class backBtnListener implements ActionListener {
         @Override
         public void actionPerformed(ActionEvent e) {
-			setContentPane(toolPane);
+			mainPanel.removeAll();
+			mainPanel.add(extraPanel);
+			mainPanel.add(toolPane);
+
 			nextBtn.setEnabled(false);
 			backBtn.setEnabled(false);
             revalidate();
             repaint();
+			pack();
         }
     }
 
