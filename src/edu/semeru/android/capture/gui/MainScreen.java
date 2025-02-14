@@ -76,6 +76,7 @@ public class MainScreen extends JFrame {
 	String url;
 	Process videoProcess;
 	Process geteventProcess;
+	File getevent;
 
 	private JLabel statusLabel;
 	private JLabel timerLabel;
@@ -111,16 +112,6 @@ public class MainScreen extends JFrame {
 		adbTextField = new JTextField(10);
 		excpetionLabel = new JTextArea(50,50);
 
-
-		//Pre-defined paths For quick testing purposes
-
-//		mockupFolderTextField.setText("/Users/KevinMoran/Dropbox/Documents/My_Graduate_School_Work/SEMERU/git_src_code/gitlab-code/Android-GUI-Checker/Subjects/Testing/HuaweiModification/HiApp-CategoryTest2");
-//		mockupImageTextField.setText("/Users/KevinMoran/Dropbox/Documents/My_Graduate_School_Work/SEMERU/git_src_code/gitlab-code/Android-GUI-Checker/Subjects/Testing/HuaweiModification/HiApp-CategoryTest2/InputMockupImage.png");
-//		implementationXmlTextField.setText("/Users/KevinMoran/Dropbox/Documents/My_Graduate_School_Work/SEMERU/git_src_code/gitlab-code/Android-GUI-Checker/Subjects/Full-Examples/Current-Files/Implementation/Huawei-App-Store/December-16/Nexus-6P/HiApp-Category.xml");
-//		implementationImageTextField.setText("/Users/KevinMoran/Dropbox/Documents/My_Graduate_School_Work/SEMERU/git_src_code/gitlab-code/Android-GUI-Checker/Subjects/Full-Examples/Current-Files/Implementation/Huawei-App-Store/December-16/Nexus-6P/HiApp-Category.png");
-//		implementationSrcTextField.setText("/Users/KevinMoran/Dropbox/Documents/My_Graduate_School_Work/SEMERU/git_src_code/gitlab-code/Android-GUI-Checker/Subjects/Full-Examples/Current-Files/Implementation/Huawei-App-Store/December-16/Nexus-6P/layout");
-//		outputFolderTextField.setText("/Users/KevinMoran/Desktop/output");
-
 		//Set Up Labels for the Text Fields and Buttons
 
 		JLabel outputPathLabel = new JLabel("Output Path:");
@@ -129,7 +120,7 @@ public class MainScreen extends JFrame {
 		timer = new JLabel("3:00");
 		timerLabel = new JLabel("Video Time Remaining:");
 
-		BufferedImage previewPic = ImageIO.read(new File("libs" + File.separator + "img" + File.separator + "preview.png"));
+		BufferedImage previewPic = ImageIO.read(new File("lib" + File.separator + "img" + File.separator + "preview.png"));
 		previewPicLabel = new JLabel(new ImageIcon(previewPic.getScaledInstance(120, 214, Image.SCALE_SMOOTH)));
 
 
@@ -152,7 +143,7 @@ public class MainScreen extends JFrame {
 
 		nextBtn = new JButton("Next");
 		nextBtn.setToolTipText("Click here to start the Trace Replayer process.");
-        nextBtn.setEnabled(true);
+        nextBtn.setEnabled(false);
 		nextBtn.addActionListener(new nextBtnListener());
 
 		backBtn = new JButton("←");
@@ -309,6 +300,7 @@ public class MainScreen extends JFrame {
 
     private void loadTraceReplayerPanel() {
         TraceReplayerPanel t = new TraceReplayerPanel(outputFolderTextField.getText());
+		t.setGetEventLog(getevent);
 		JScrollPane scrPane = new JScrollPane(t);
 		Border padding = BorderFactory.createEmptyBorder(2, 4, 2, 4);
 		scrPane.setBorder(padding);
@@ -390,23 +382,21 @@ public class MainScreen extends JFrame {
 	                            timer.setText(df.format(count));
 	                            Controller.pullVideo(outputFolderTextField.getText() + File.separator + startTimeStamp + "video.mp4", adbTextField.getText());
 	                            
-	                            
 	                            File video = new File(outputFolderTextField.getText() + File.separator + startTimeStamp + "video.mp4");
 	                            File getevent = new File(outputFolderTextField.getText() + File.separator + startTimeStamp + "getevent.log");
 
-	                            if(video.exists() && getevent.exists()){
-
+	                            if (video.exists() && getevent.exists()) {
 	                                statusLabel.setForeground(Color.GREEN);
 	                                statusLabel.setText("Capture Complete!");
+									MainScreen.this.getevent = getevent;
                                     nextBtn.setEnabled(true);
 
-	                            }else{
+	                            } else {
 	                                statusLabel.setForeground(Color.RED);
 	                                statusLabel.setText("Unable to Connect to Device!");
 	
 	                                BufferedImage previewPic = ImageIO.read(new File("libs" + File.separator + "img" + File.separator + "preview.png"));
 	                                previewPicLabel.setIcon(new ImageIcon(previewPic.getScaledInstance(120, 214, Image.SCALE_SMOOTH)));
-
 	                            }
 
 	                        } catch (Exception e2) {
@@ -480,25 +470,6 @@ public class MainScreen extends JFrame {
                         geteventProcess = Controller.startGetEventCapture(outputFolderTextField.getText() + File.separator+ startTimeStamp +"getevent.log", adbTextField.getText());
                         loading.setVisible(false);
                         cdTimer.start();
-//                            File screenshot = new File(outputFolderTextField.getText() + File.separator + "screen.png");
-//                            File uiDump = new File(outputFolderTextField.getText() + File.separator + "ui-dump.xml");
-
-//                            if(screenshot.exists() && uiDump.exists()){
-
-//                                BufferedImage ssPreview = ImageIO.read(screenshot);
-
-//                                statusLabel.setForeground(Color.GREEN);
-//                                statusLabel.setText("Capture Complete!");
-//                                previewPicLabel.setIcon(new ImageIcon(ssPreview.getScaledInstance(120, 214, Image.SCALE_SMOOTH)));
-
-//                            }else{
-//                                statusLabel.setForeground(Color.RED);
-//                                statusLabel.setText("Unable to Connect to Device!");
-//
-//                                BufferedImage previewPic = ImageIO.read(new File("libs" + File.separator + "img" + File.separator + "preview.png"));
-//                                previewPicLabel.setIcon(new ImageIcon(previewPic.getScaledInstance(120, 214, Image.SCALE_SMOOTH)));
-
-//                            }
 
                     } catch (Exception e2) {
                         StringWriter sw = new StringWriter();
@@ -540,7 +511,6 @@ public class MainScreen extends JFrame {
                     e2.printStackTrace();
                 }
             }
-            
         }
 	}
 
@@ -552,6 +522,7 @@ public class MainScreen extends JFrame {
             revalidate();
             repaint();
 			backBtn.setEnabled(true);
+			nextBtn.setEnabled(false);
         }
     }
 
@@ -571,90 +542,19 @@ public class MainScreen extends JFrame {
     }
 
 
-	public int getFrameXCoord(){
+	public int getFrameXCoord() {
 		int x =0;  
 		x = (this.getWidth() - loading.getWidth()) / 2;
 		x += this.getLocationOnScreen().x;
 		return x;
 	}
 
-	public int getFrameYCoord(){
+	public int getFrameYCoord() {
 		int y =0;  
 		y = (this.getHeight() - loading.getHeight()) / 2;
 		y += this.getLocationOnScreen().y;
 		return y;
 	}
-
-	// This works for sure
-	private File extractEmbeddedJar() {
-		try {
-			// Load the JAR from resources folder
-			InputStream jarStream = getClass().getClassLoader().getResourceAsStream("trace-replayer.jar");
-			if (jarStream == null) {
-				throw new IOException("JAR resource not found: trace-replayer.jar");
-			}
-	
-			// Create a temporary file for the extracted JAR
-			File tempJar = File.createTempFile("trace-replayer-", ".jar");
-			tempJar.deleteOnExit();
-	
-			// Write JAR data to the temp file
-			try (FileOutputStream out = new FileOutputStream(tempJar)) {
-				byte[] buffer = new byte[1024];
-				int bytesRead;
-				while ((bytesRead = jarStream.read(buffer)) != -1) {
-					out.write(buffer, 0, bytesRead);
-				}
-			}
-	
-			System.out.println("Extracted JAR to: " + tempJar.getAbsolutePath());
-			return tempJar;
-	
-		} catch (IOException e) {
-			e.printStackTrace();
-			return null;
-		}
-	}
-	
-	// Needs more testing witha actual config file, not sure where the output of the JAR goes?
-	private void runJarWithConfig(File configFile) {
-		File extractedJar = extractEmbeddedJar(); // Extract JAR
-		if (extractedJar == null) {
-			System.err.println("Failed to extract JAR.");
-			return;
-		}
-	
-		if (configFile == null || !configFile.exists()) {
-			System.err.println("Config file is missing. JAR execution aborted.");
-			return;
-		}
-	
-		try {
-			System.out.println("Running JAR with config: " + configFile.getAbsolutePath());
-			
-			ProcessBuilder processBuilder = new ProcessBuilder(
-				"java", "-jar", extractedJar.getAbsolutePath(), "--config", configFile.getAbsolutePath()
-			);
-			processBuilder.redirectErrorStream(true);
-			Process process = processBuilder.start();
-	
-			// Capture and print JAR output
-			try (BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()))) {
-				String line;
-				while ((line = reader.readLine()) != null) {
-					System.out.println("JAR Output: " + line);
-				}
-			}
-	
-			int exitCode = process.waitFor();
-			System.out.println("JAR Execution Finished with exit code: " + exitCode);
-		} catch (IOException | InterruptedException ex) {
-			ex.printStackTrace();
-		}
-	}
-	
-	
-	
 	
 	public static void main(String[] args) {
 

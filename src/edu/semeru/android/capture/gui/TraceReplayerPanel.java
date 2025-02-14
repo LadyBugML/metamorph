@@ -16,7 +16,9 @@ import java.awt.event.ActionListener;
 import java.awt.event.ItemEvent;
 import java.awt.image.BufferedImage;
 import java.io.File;
+import java.io.FileOutputStream;
 import java.io.IOException;
+import java.io.InputStream;
 import java.io.PrintWriter;
 import java.io.StringWriter;
 import java.nio.file.Path;
@@ -79,6 +81,8 @@ public class TraceReplayerPanel extends JPanel {
     private int avdPort;
     private int adbPort;
     private int executionNum;
+
+    private File getevent;
 
 
     public TraceReplayerPanel(String output) {
@@ -267,7 +271,6 @@ public class TraceReplayerPanel extends JPanel {
                     }
                 }
             }
-            
             int avdPortNumber;
             int adbPortNumber;
             int executionNumber;
@@ -282,13 +285,50 @@ public class TraceReplayerPanel extends JPanel {
                 return;
             }
             try {
-                Controller.createConfigFile(androidSdkPathField.getText(), aaptPathField.getText(), apkPathField.getText(), outputPath,
+                File configFile = Controller.createConfigFile(androidSdkPathField.getText(), aaptPathField.getText(), apkPathField.getText(), getevent.getAbsolutePath(), outputPath,
                                             avdPortNumber, adbPortNumber, executionNumber);
+                Controller.runJarWithConfig(configFile, extractEmbeddedJar());
             } catch (IOException ex) {
                 ex.printStackTrace();
             }
             statusLabel.setForeground(Color.GREEN);
             statusLabel.setText("Ready!");
 		}
+    }
+
+    // This works for sure
+	private File extractEmbeddedJar() {
+		try {
+			// Load the JAR from resources folder
+			InputStream jarStream = getClass().getClassLoader().getResourceAsStream("trace-replayer.jar");
+			if (jarStream == null) {
+				throw new IOException("JAR resource not found: trace-replayer.jar");
+			}
+	
+			// Create a temporary file for the extracted JAR
+			File tempJar = File.createTempFile("trace-replayer-", ".jar");
+			tempJar.deleteOnExit();
+	
+			// Write JAR data to the temp file
+			try (FileOutputStream out = new FileOutputStream(tempJar)) {
+				byte[] buffer = new byte[1024];
+				int bytesRead;
+				while ((bytesRead = jarStream.read(buffer)) != -1) {
+					out.write(buffer, 0, bytesRead);
+				}
+			}
+	
+			System.out.println("Extracted JAR to: " + tempJar.getAbsolutePath());
+			return tempJar;
+	
+		} catch (IOException e) {
+			e.printStackTrace();
+			return null;
+		}
+	}
+
+    public void setGetEventLog(File geteventlog) {
+        if (geteventlog != null)
+            this.getevent = geteventlog;
     }
 }
