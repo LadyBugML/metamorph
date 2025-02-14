@@ -4,6 +4,9 @@
 *.ear
 *.class
 
+# Built executable
+AVTR-*.jar
+
 # eclipse specific git ignore
 *.pydevproject
 .metadata
