@@ -31,8 +31,11 @@
  */
 package edu.semeru.android.capture.controller;
 
+import java.io.BufferedReader;
 import java.io.File;
+import java.io.FileWriter;
 import java.io.IOException;
+import java.io.InputStreamReader;
 import java.lang.reflect.Field;
 
 import org.apache.commons.lang.SystemUtils;
@@ -269,4 +272,63 @@ public class Controller {
         return result;
     }
 
+    public static File createConfigFile(String androidSdkPath, String aaptPath, String apkPath, String getEventFilePath,
+                                        String outputPath, int avdPort, int adbPort, int executionNum) throws IOException {
+        
+        String pythonScriptsPath = String.format("%s/lib/python-scripts/", System.getProperty("user.dir"));
+        FileWriter configFileWriter = new FileWriter(outputPath + "/config.yaml");
+        configFileWriter.write("androidSDKPath: " + androidSdkPath + "\n");
+        configFileWriter.write("pythonScriptsPath: " + pythonScriptsPath + "\n");
+        configFileWriter.write("aaptPath: " + aaptPath + "\n");
+        configFileWriter.write("apkPath: " + apkPath + "\n");
+        configFileWriter.write("getEventFile: " + getEventFilePath + "\n");
+        configFileWriter.write("outputFolder: " + outputPath + "\n");
+        configFileWriter.write("avdPort: " + avdPort + "\n");
+        configFileWriter.write("adbPort: " + adbPort + "\n");
+        configFileWriter.write("executionNum: " + executionNum + "\n");
+        configFileWriter.close();
+
+        File configFileHandle = new File(outputPath + "/config.yaml");
+        return configFileHandle;
+    }
+    
+
+    // Needs more testing witha actual config file, not sure where the output of the JAR goes?
+	public static int runJarWithConfig(File configFile, File extractedJar) {
+		// File extractedJar = extractEmbeddedJar(); // Extract JAR
+		if (extractedJar == null) {
+			System.err.println("Failed to extract JAR.");
+			return 1;
+		}
+	
+		if (configFile == null || !configFile.exists()) {
+			System.err.println("Config file is missing. JAR execution aborted.");
+			return 1;
+		}
+	
+		try {
+			System.out.println("Running JAR with config: " + configFile.getAbsolutePath());
+			
+			ProcessBuilder processBuilder = new ProcessBuilder(
+				"java", "-jar", extractedJar.getAbsolutePath(), "--config", configFile.getAbsolutePath()
+			);
+			processBuilder.redirectErrorStream(true);
+			Process process = processBuilder.start();
+	
+			// Capture and print JAR output
+			try (BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()))) {
+				String line;
+				while ((line = reader.readLine()) != null) {
+					System.out.println("JAR Output: " + line);
+				}
+			}
+	
+			int exitCode = process.waitFor();
+			System.out.println("JAR Execution Finished with exit code: " + exitCode);
+            return 0;
+		} catch (IOException | InterruptedException ex) {
+			ex.printStackTrace();
+            return 1;
+		}
+	}
 }

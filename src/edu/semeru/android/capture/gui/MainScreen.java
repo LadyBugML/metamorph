@@ -25,6 +25,7 @@ import java.util.List;
 
 import javax.imageio.ImageIO;
 import javax.swing.BorderFactory;
+import javax.swing.BoxLayout;
 import javax.swing.GroupLayout;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
@@ -51,14 +52,16 @@ import javax.swing.event.ChangeListener;
 import java.io.*;
 
 import edu.semeru.android.capture.controller.Controller;
+import edu.semeru.android.capture.gui.TraceReplayerPanel;
 
 /**
  * @author KevinMoran
  *
  */
-public class MainScreen extends JFrame{
-
+public class MainScreen extends JFrame {
+	private JPanel mainPanel;
 	private JPanel toolPane;
+	private JPanel extraPanel;
 	JLabel implementationSrcLabel;
 	private GridBagConstraints c;
 
@@ -73,13 +76,15 @@ public class MainScreen extends JFrame{
 	String url;
 	Process videoProcess;
 	Process geteventProcess;
+	File getevent;
 
 	private JLabel statusLabel;
 	private JLabel timerLabel;
 	private JLabel timer;
 	JButton startBtn;
 	JButton stopBtn;
-	JButton dummyBtn; // test
+	JButton nextBtn; // test
+	JButton backBtn;
 
 	JLabel previewPicLabel;
 	private JTextArea excpetionLabel;
@@ -100,25 +105,12 @@ public class MainScreen extends JFrame{
 		initializeGUI();
 	}
 
-	private void initializeGUI() throws IOException{
-
-
-
+	private void initializeGUI() throws IOException {
 		//Set up Text Fields for the Paths to Information needed by the GVT
 
 		outputFolderTextField = new JTextField(10);
 		adbTextField = new JTextField(10);
 		excpetionLabel = new JTextArea(50,50);
-
-
-		//Pre-defined paths For quick testing purposes
-
-//		mockupFolderTextField.setText("/Users/KevinMoran/Dropbox/Documents/My_Graduate_School_Work/SEMERU/git_src_code/gitlab-code/Android-GUI-Checker/Subjects/Testing/HuaweiModification/HiApp-CategoryTest2");
-//		mockupImageTextField.setText("/Users/KevinMoran/Dropbox/Documents/My_Graduate_School_Work/SEMERU/git_src_code/gitlab-code/Android-GUI-Checker/Subjects/Testing/HuaweiModification/HiApp-CategoryTest2/InputMockupImage.png");
-//		implementationXmlTextField.setText("/Users/KevinMoran/Dropbox/Documents/My_Graduate_School_Work/SEMERU/git_src_code/gitlab-code/Android-GUI-Checker/Subjects/Full-Examples/Current-Files/Implementation/Huawei-App-Store/December-16/Nexus-6P/HiApp-Category.xml");
-//		implementationImageTextField.setText("/Users/KevinMoran/Dropbox/Documents/My_Graduate_School_Work/SEMERU/git_src_code/gitlab-code/Android-GUI-Checker/Subjects/Full-Examples/Current-Files/Implementation/Huawei-App-Store/December-16/Nexus-6P/HiApp-Category.png");
-//		implementationSrcTextField.setText("/Users/KevinMoran/Dropbox/Documents/My_Graduate_School_Work/SEMERU/git_src_code/gitlab-code/Android-GUI-Checker/Subjects/Full-Examples/Current-Files/Implementation/Huawei-App-Store/December-16/Nexus-6P/layout");
-//		outputFolderTextField.setText("/Users/KevinMoran/Desktop/output");
 
 		//Set Up Labels for the Text Fields and Buttons
 
@@ -128,7 +120,7 @@ public class MainScreen extends JFrame{
 		timer = new JLabel("3:00");
 		timerLabel = new JLabel("Video Time Remaining:");
 
-		BufferedImage previewPic = ImageIO.read(new File("libs" + File.separator + "img" + File.separator + "preview.png"));
+		BufferedImage previewPic = ImageIO.read(new File("lib" + File.separator + "img" + File.separator + "preview.png"));
 		previewPicLabel = new JLabel(new ImageIcon(previewPic.getScaledInstance(120, 214, Image.SCALE_SMOOTH)));
 
 
@@ -144,27 +136,22 @@ public class MainScreen extends JFrame{
 		startBtn.setToolTipText("Click Here to capture a video recording and replayable script of actions on your android device.");
 		startBtn.addActionListener(new startBtnListener());
 		
-		stopBtn = new JButton("End Catpure");
+		stopBtn = new JButton("End Capture");
         stopBtn.setToolTipText("Click Here to to stop the capture process.");
         stopBtn.addActionListener(new stopBtnListener());
         stopBtn.setEnabled(false);
 
+		nextBtn = new JButton("Next");
+		nextBtn.setToolTipText("Click here to start the Trace Replayer process.");
+        nextBtn.setEnabled(false);
+		nextBtn.addActionListener(new nextBtnListener());
 
-		// TEST START
-		// Initialize the Dummy Button
-		dummyBtn = new JButton("Dummy Button");
-		dummyBtn.setToolTipText("This is a dummy button with no real functionality.");
+		backBtn = new JButton("←");
+        backBtn.setEnabled(false);
+		backBtn.addActionListener(new backBtnListener());
 
-		// Add an ActionListener to handle button clicks
-		dummyBtn.addActionListener(new ActionListener() {
-			@Override
-			public void actionPerformed(ActionEvent e) {
-				statusLabel.setText("Dummy Button Clicked!");
-				statusLabel.setForeground(Color.BLUE);
-			}
-		});
+		
 		// TEST END
-
 
 		ImageIcon gvtIcon = new ImageIcon("resources/GVT-Logo.png");
 		
@@ -178,17 +165,22 @@ public class MainScreen extends JFrame{
 			e.printStackTrace();
 		}
 
-		JTabbedPane tabbedPane = new JTabbedPane();
-
-		setContentPane(tabbedPane);
+		///JTabbedPane tabbedPane = new JTabbedPane();
+		//setContentPane(tabbedPane);
 
 		toolPane = new JPanel(new GridBagLayout());
+		extraPanel = new JPanel(new GridBagLayout());
+		mainPanel = new JPanel();
+		mainPanel.setLayout(new BoxLayout(mainPanel, BoxLayout.Y_AXIS));
+		
 		JScrollPane scrPane = new JScrollPane(toolPane);
 		Border padding = BorderFactory.createEmptyBorder(2, 4, 2, 4);
 		scrPane.setBorder(padding);
 
+		mainPanel.add(extraPanel);
+		mainPanel.add(toolPane);
 
-		setContentPane(scrPane);
+		add(mainPanel);
 		
 	    cdTimer = new Timer(1000, new TimerListener());
 	    cdTimer.setInitialDelay(0);
@@ -204,7 +196,7 @@ public class MainScreen extends JFrame{
 		c.gridx = 0;
 		c.gridy = 0;
 		c.gridwidth = 2;
-		toolPane.add(outputPathLabel,c);
+		toolPane.add(outputPathLabel, c);
 
 		c.gridx = 0;
 		c.gridy = 1;
@@ -214,7 +206,7 @@ public class MainScreen extends JFrame{
 
 		c.gridx = 1;
 		c.gridy = 1;
-		c.weightx=1;
+		c.weightx = 1;
 		toolPane.add(outputFolderSelectorBtn, c);
 		
 	    c.gridx = 0;
@@ -230,7 +222,7 @@ public class MainScreen extends JFrame{
 	    
 	    c.gridx = 1;
 	    c.gridy = 3;
-	    c.weightx=1;
+	    c.weightx = 1;
 	    toolPane.add(adbSelectorBtn, c);
 
 		//----------------------------------------------------
@@ -243,7 +235,7 @@ public class MainScreen extends JFrame{
 		c.anchor = GridBagConstraints.CENTER;
 		c.gridx = 0;
 		c.gridy = 13;
-		c.weightx=1;
+		c.weightx = 1;
 		c.fill = GridBagConstraints.NONE;
 		c.gridwidth = 1;
 		toolPane.add(startBtn, c);
@@ -251,11 +243,14 @@ public class MainScreen extends JFrame{
 		c.gridx = 1;
         c.gridy = 13;
 		c.gridwidth = 1;
+        c.weightx = 1;
         toolPane.add(stopBtn, c);
 
 		c.gridx = 2; // Adjust the x-coordinate for positioning
 		c.gridy = 13; // Place the button on a new row below the others
-		toolPane.add(dummyBtn, c);
+        c.gridwidth = 1;
+        c.weightx = 1;
+		toolPane.add(nextBtn, c);
 
 		statusLabel = new JLabel("Current Status: Awaiting Capture");
 		c.gridx = 0;
@@ -270,23 +265,27 @@ public class MainScreen extends JFrame{
         c.gridy = 15;
         toolPane.add(timer, c);
 
-		c.gridx = 2;
-		c.gridy = 41;
-		c.weightx=1;
-		toolPane.add(versionNumberLabel, c);
-
 		excpetionLabel.setVisible(false);
 		c.gridx = 0;
 		c.gridy = 42;
 		toolPane.add(excpetionLabel, c);
 
+		c.gridx = 2;
+		c.gridy = 42;
+		c.weightx = 1;
+		toolPane.add(versionNumberLabel, c);
+
+		c.anchor = GridBagConstraints.LINE_START;
+		c.gridx = -1;
+		c.gridy = 0;
+		c.weightx = 2;
+		extraPanel.add(backBtn, c);
 
 		setTitle("Android Video Capture Tool");
 		setIconImage(gvtIcon.getImage());
 		pack();
 		setLocationRelativeTo(null);
 		setDefaultCloseOperation(EXIT_ON_CLOSE);
-
 
 		loading = new JDialog(this);
 		JPanel p1 = new JPanel();
@@ -297,9 +296,23 @@ public class MainScreen extends JFrame{
 		loading.setLocationRelativeTo(this);
 		loading.setDefaultCloseOperation(JDialog.DO_NOTHING_ON_CLOSE);
 		loading.setModal(true);
-		
-
 	}
+
+    private void loadTraceReplayerPanel() {
+        TraceReplayerPanel t = new TraceReplayerPanel(outputFolderTextField.getText());
+		t.setGetEventLog(getevent);
+		JScrollPane scrPane = new JScrollPane(t);
+		Border padding = BorderFactory.createEmptyBorder(2, 4, 2, 4);
+		scrPane.setBorder(padding);
+
+		mainPanel.removeAll();
+		mainPanel.add(extraPanel);
+		mainPanel.add(scrPane);
+
+		repaint();
+		revalidate();
+        pack();
+    }
 
 	 public class TimerListener implements ActionListener {
 
@@ -326,7 +339,6 @@ public class MainScreen extends JFrame{
 				outputFolderPath = fc.getSelectedFile().getAbsolutePath();
 				outputFolderTextField.setText(outputFolderPath);
 			}
-
 		}
 	}
 	
@@ -370,22 +382,21 @@ public class MainScreen extends JFrame{
 	                            timer.setText(df.format(count));
 	                            Controller.pullVideo(outputFolderTextField.getText() + File.separator + startTimeStamp + "video.mp4", adbTextField.getText());
 	                            
-	                            
 	                            File video = new File(outputFolderTextField.getText() + File.separator + startTimeStamp + "video.mp4");
 	                            File getevent = new File(outputFolderTextField.getText() + File.separator + startTimeStamp + "getevent.log");
 
-	                            if(video.exists() && getevent.exists()){
-
+	                            if (video.exists() && getevent.exists()) {
 	                                statusLabel.setForeground(Color.GREEN);
 	                                statusLabel.setText("Capture Complete!");
+									MainScreen.this.getevent = getevent;
+                                    nextBtn.setEnabled(true);
 
-	                            }else{
+	                            } else {
 	                                statusLabel.setForeground(Color.RED);
 	                                statusLabel.setText("Unable to Connect to Device!");
 	
 	                                BufferedImage previewPic = ImageIO.read(new File("libs" + File.separator + "img" + File.separator + "preview.png"));
 	                                previewPicLabel.setIcon(new ImageIcon(previewPic.getScaledInstance(120, 214, Image.SCALE_SMOOTH)));
-
 	                            }
 
 	                        } catch (Exception e2) {
@@ -459,25 +470,6 @@ public class MainScreen extends JFrame{
                         geteventProcess = Controller.startGetEventCapture(outputFolderTextField.getText() + File.separator+ startTimeStamp +"getevent.log", adbTextField.getText());
                         loading.setVisible(false);
                         cdTimer.start();
-//                            File screenshot = new File(outputFolderTextField.getText() + File.separator + "screen.png");
-//                            File uiDump = new File(outputFolderTextField.getText() + File.separator + "ui-dump.xml");
-
-//                            if(screenshot.exists() && uiDump.exists()){
-
-//                                BufferedImage ssPreview = ImageIO.read(screenshot);
-
-//                                statusLabel.setForeground(Color.GREEN);
-//                                statusLabel.setText("Capture Complete!");
-//                                previewPicLabel.setIcon(new ImageIcon(ssPreview.getScaledInstance(120, 214, Image.SCALE_SMOOTH)));
-
-//                            }else{
-//                                statusLabel.setForeground(Color.RED);
-//                                statusLabel.setText("Unable to Connect to Device!");
-//
-//                                BufferedImage previewPic = ImageIO.read(new File("libs" + File.separator + "img" + File.separator + "preview.png"));
-//                                previewPicLabel.setIcon(new ImageIcon(previewPic.getScaledInstance(120, 214, Image.SCALE_SMOOTH)));
-
-//                            }
 
                     } catch (Exception e2) {
                         StringWriter sw = new StringWriter();
@@ -519,95 +511,50 @@ public class MainScreen extends JFrame{
                     e2.printStackTrace();
                 }
             }
-            
         }
 	}
 
+    // Swaps over to a screen that collects all the necessary trace replayer information
+    public class nextBtnListener implements ActionListener {
+        @Override
+        public void actionPerformed(ActionEvent e) {
+            loadTraceReplayerPanel();
+            revalidate();
+            repaint();
+			backBtn.setEnabled(true);
+			nextBtn.setEnabled(false);
+        }
+    }
 
-	public int getFrameXCoord(){
+	public class backBtnListener implements ActionListener {
+        @Override
+        public void actionPerformed(ActionEvent e) {
+			mainPanel.removeAll();
+			mainPanel.add(extraPanel);
+			mainPanel.add(toolPane);
+
+			nextBtn.setEnabled(false);
+			backBtn.setEnabled(false);
+            revalidate();
+            repaint();
+			pack();
+        }
+    }
+
+
+	public int getFrameXCoord() {
 		int x =0;  
 		x = (this.getWidth() - loading.getWidth()) / 2;
 		x += this.getLocationOnScreen().x;
 		return x;
 	}
 
-	public int getFrameYCoord(){
+	public int getFrameYCoord() {
 		int y =0;  
 		y = (this.getHeight() - loading.getHeight()) / 2;
 		y += this.getLocationOnScreen().y;
 		return y;
 	}
-
-	// This works for sure
-	private File extractEmbeddedJar() {
-		try {
-			// Load the JAR from resources folder
-			InputStream jarStream = getClass().getClassLoader().getResourceAsStream("trace-replayer.jar");
-			if (jarStream == null) {
-				throw new IOException("JAR resource not found: trace-replayer.jar");
-			}
-	
-			// Create a temporary file for the extracted JAR
-			File tempJar = File.createTempFile("trace-replayer-", ".jar");
-			tempJar.deleteOnExit();
-	
-			// Write JAR data to the temp file
-			try (FileOutputStream out = new FileOutputStream(tempJar)) {
-				byte[] buffer = new byte[1024];
-				int bytesRead;
-				while ((bytesRead = jarStream.read(buffer)) != -1) {
-					out.write(buffer, 0, bytesRead);
-				}
-			}
-	
-			System.out.println("Extracted JAR to: " + tempJar.getAbsolutePath());
-			return tempJar;
-	
-		} catch (IOException e) {
-			e.printStackTrace();
-			return null;
-		}
-	}
-	
-	// Needs more testing witha actual config file, not sure where the output of the JAR goes?
-	private void runJarWithConfig(File configFile) {
-		File extractedJar = extractEmbeddedJar(); // Extract JAR
-		if (extractedJar == null) {
-			System.err.println("Failed to extract JAR.");
-			return;
-		}
-	
-		if (configFile == null || !configFile.exists()) {
-			System.err.println("Config file is missing. JAR execution aborted.");
-			return;
-		}
-	
-		try {
-			System.out.println("Running JAR with config: " + configFile.getAbsolutePath());
-			
-			ProcessBuilder processBuilder = new ProcessBuilder(
-				"java", "-jar", extractedJar.getAbsolutePath(), "--config", configFile.getAbsolutePath()
-			);
-			processBuilder.redirectErrorStream(true);
-			Process process = processBuilder.start();
-	
-			// Capture and print JAR output
-			try (BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()))) {
-				String line;
-				while ((line = reader.readLine()) != null) {
-					System.out.println("JAR Output: " + line);
-				}
-			}
-	
-			int exitCode = process.waitFor();
-			System.out.println("JAR Execution Finished with exit code: " + exitCode);
-		} catch (IOException | InterruptedException ex) {
-			ex.printStackTrace();
-		}
-	}
-	
-	
-	
 	
 	public static void main(String[] args) {
 
@@ -625,6 +572,4 @@ public class MainScreen extends JFrame{
 
 		//getignoredDimensions(defaultIgnored);
 	}
-
-
 }
