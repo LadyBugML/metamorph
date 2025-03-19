@@ -288,7 +288,7 @@ public class Controller {
         configFileWriter.write("executionNum: " + executionNum + "\n");
         configFileWriter.close();
 
-        File configFileHandle = new File(outputPath + "/config.yaml");
+        File configFileHandle = new File(outputPath + File.separator + "config.yaml");
         return configFileHandle;
     }
     
