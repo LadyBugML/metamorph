@@ -275,8 +275,8 @@ public class Controller {
     public static File createConfigFile(String androidSdkPath, String aaptPath, String apkPath, String getEventFilePath,
                                         String outputPath, int avdPort, int adbPort, int executionNum) throws IOException {
         
-        String pythonScriptsPath = String.format("%s/lib/python-scripts/", System.getProperty("user.dir"));
-        FileWriter configFileWriter = new FileWriter(outputPath + "/config.yaml");
+        String pythonScriptsPath = String.format("%s" + File.separator + "lib" + File.separator + "python-scripts" + File.separator, System.getProperty("user.dir"));
+        FileWriter configFileWriter = new FileWriter(outputPath + File.separator + "config.yaml");
         configFileWriter.write("androidSDKPath: " + androidSdkPath + "\n");
         configFileWriter.write("pythonScriptsPath: " + pythonScriptsPath + "\n");
         configFileWriter.write("aaptPath: " + aaptPath + "\n");
