@@ -198,11 +198,6 @@ public class Controller {
         Process geteventprocess = builder.start();
 
         return geteventprocess;
-        
-        // String output1 = CmdProcessBuilder.executeCommand(uiCommand1);
-        // System.out.println(output1);
-        // String output2 = CmdProcessBuilder.executeCommand(uiCommand2);
-        // System.out.println(output2);
     }
 
     public static String getAndroidSDKPath() {
@@ -210,15 +205,15 @@ public class Controller {
         String androidSDKPath = "";
 
         if (SystemUtils.IS_OS_MAC) {
-            androidSDKPath = "libs" + File.separator + "AndroidSDK-Mac";
+            androidSDKPath = "lib" + File.separator + "AndroidSDK-Mac";
         }
 
         if (SystemUtils.IS_OS_WINDOWS) {
-            androidSDKPath = "libs" + File.separator + "AndroidSDK-Windows";
+            androidSDKPath = "lib" + File.separator + "AndroidSDK-Windows";
         }
 
         if (SystemUtils.IS_OS_LINUX) {
-            androidSDKPath = "libs" + File.separator + "AndroidSDK-Linux";
+            androidSDKPath = "lib" + File.separator + "AndroidSDK-Linux";
         }
 
         return androidSDKPath;

@@ -78,9 +78,6 @@ public class TraceReplayerPanel extends JPanel {
     private String aaptPath;
     private String apkPath;
     private String outputPath;
-    private int avdPort;
-    private int adbPort;
-    private int executionNum;
 
     private File getevent;
 

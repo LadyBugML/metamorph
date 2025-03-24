@@ -2,9 +2,9 @@
 	xsi:schemaLocation="http://maven.apache.org/POM/4.0.0 http://maven.apache.org/xsd/maven-4.0.0.xsd">
 	<modelVersion>4.0.0</modelVersion>
 	<groupId>Android-VCT</groupId>
-	<artifactId>AVTR</artifactId>
+	<artifactId>AVCT</artifactId>
 	<version>1.0</version>
-	<name>ACT</name>
+	<name>AVCT</name>
 	<repositories>
 		<!--other repositories if any -->
 		<repository>
@@ -116,5 +116,10 @@
 			<artifactId>org.apache.commons.io</artifactId>
 			<version>2.4</version>
 		</dependency>
+        <dependency>
+            <groupId>com.formdev</groupId>
+            <artifactId>flatlaf</artifactId>
+            <version>3.5.4</version>
+        </dependency>
 	</dependencies>
 </project>

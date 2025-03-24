@@ -6,6 +6,7 @@
 
 # Built executable
 AVTR-*.jar
+AVCT-*.jar
 
 # eclipse specific git ignore
 *.pydevproject

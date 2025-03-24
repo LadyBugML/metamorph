@@ -4,14 +4,17 @@
 package edu.semeru.android.capture.gui;
 
 import java.awt.BorderLayout;
+import java.awt.CardLayout;
 import java.awt.Color;
 import java.awt.Dimension;
+import java.awt.Toolkit;
 import java.awt.EventQueue;
 import java.awt.Font;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Image;
 import java.awt.Insets;
+import java.awt.Rectangle;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
 import java.awt.event.ItemEvent;
@@ -46,10 +49,13 @@ import javax.swing.SwingConstants;
 import javax.swing.SwingWorker;
 import javax.swing.Timer;
 import javax.swing.UIManager;
+import javax.swing.UnsupportedLookAndFeelException;
 import javax.swing.border.Border;
 import javax.swing.event.ChangeEvent;
 import javax.swing.event.ChangeListener;
 import java.io.*;
+
+import com.formdev.flatlaf.FlatDarkLaf;
 
 import edu.semeru.android.capture.controller.Controller;
 import edu.semeru.android.capture.gui.TraceReplayerPanel;
@@ -59,10 +65,15 @@ import edu.semeru.android.capture.gui.TraceReplayerPanel;
  *
  */
 public class MainScreen extends JFrame {
+
+    private static int WINDOW_WIDTH = 640;
+    private static int WINDOW_HEIGHT = 480;
+
 	private JPanel mainPanel;
 	private JPanel toolPane;
-	private JPanel extraPanel;
+	private JPanel navigationPanel;
 	JLabel implementationSrcLabel;
+    private GridBagConstraints panelConstraints;
 	private GridBagConstraints c;
 
 	private JTextField outputFolderTextField;
@@ -83,7 +94,7 @@ public class MainScreen extends JFrame {
 	private JLabel timer;
 	JButton startBtn;
 	JButton stopBtn;
-	JButton nextBtn; // test
+	JButton nextBtn;
 	JButton backBtn;
 
 	JLabel previewPicLabel;
@@ -92,12 +103,9 @@ public class MainScreen extends JFrame {
 	JButton implementationSrcSelectorBtn;
 	Timer cdTimer;
 
+
 	private JDialog loading;
 
-
-	/**
-	 * 
-	 */
 	private static final long serialVersionUID = 1964235073593292125L;
 
 	public MainScreen() throws IOException {
@@ -106,7 +114,6 @@ public class MainScreen extends JFrame {
 	}
 
 	private void initializeGUI() throws IOException {
-		//Set up Text Fields for the Paths to Information needed by the GVT
 
 		outputFolderTextField = new JTextField(10);
 		adbTextField = new JTextField(10);
@@ -116,7 +123,7 @@ public class MainScreen extends JFrame {
 
 		JLabel outputPathLabel = new JLabel("Output Path:");
 		JLabel adbPathLabel = new JLabel("ADB Path:");
-		JLabel versionNumberLabel = new JLabel("v0.1");
+		JLabel versionNumberLabel = new JLabel("v0.2");
 		timer = new JLabel("3:00");
 		timerLabel = new JLabel("Video Time Remaining:");
 
@@ -146,20 +153,17 @@ public class MainScreen extends JFrame {
         nextBtn.setEnabled(false);
 		nextBtn.addActionListener(new nextBtnListener());
 
-		backBtn = new JButton("←");
+        backBtn = new JButton("Back");
         backBtn.setEnabled(false);
 		backBtn.addActionListener(new backBtnListener());
-
-		
-		// TEST END
 
 		ImageIcon gvtIcon = new ImageIcon("resources/GVT-Logo.png");
 		
 		try {
-			Image img = ImageIO.read(new File("resources/File-Open.png"));
-			img = img.getScaledInstance(25, 25, Image.SCALE_DEFAULT);
-			outputFolderSelectorBtn.setIcon(new ImageIcon(img));
-			adbSelectorBtn.setIcon(new ImageIcon(img));
+			Image fileOpenImage = ImageIO.read(new File("resources/File-Open.png"));
+			fileOpenImage = fileOpenImage.getScaledInstance(25, 25, Image.SCALE_DEFAULT);
+			outputFolderSelectorBtn.setIcon(new ImageIcon(fileOpenImage));
+			adbSelectorBtn.setIcon(new ImageIcon(fileOpenImage));
 		} catch (IOException e) {
 			// TODO Auto-generated catch block
 			e.printStackTrace();
@@ -169,16 +173,29 @@ public class MainScreen extends JFrame {
 		//setContentPane(tabbedPane);
 
 		toolPane = new JPanel(new GridBagLayout());
-		extraPanel = new JPanel(new GridBagLayout());
+		navigationPanel = new JPanel(new GridBagLayout());
 		mainPanel = new JPanel();
-		mainPanel.setLayout(new BoxLayout(mainPanel, BoxLayout.Y_AXIS));
+		mainPanel.setLayout(new GridBagLayout());
 		
 		JScrollPane scrPane = new JScrollPane(toolPane);
 		Border padding = BorderFactory.createEmptyBorder(2, 4, 2, 4);
 		scrPane.setBorder(padding);
+        navigationPanel.setBorder(padding);
 
-		mainPanel.add(extraPanel);
-		mainPanel.add(toolPane);
+        panelConstraints = new GridBagConstraints();
+        panelConstraints.gridheight = panelConstraints.gridwidth = 1;
+
+        panelConstraints.weighty = panelConstraints.weightx = 0.7;
+        panelConstraints.anchor = GridBagConstraints.CENTER;
+        panelConstraints.gridx = panelConstraints.gridy = 0;
+		mainPanel.add(scrPane, panelConstraints);
+
+        panelConstraints.weighty = panelConstraints.weightx = 0.3;
+        panelConstraints.anchor = GridBagConstraints.LAST_LINE_END;
+        panelConstraints.gridx = panelConstraints.gridy = 1;
+		mainPanel.add(navigationPanel, panelConstraints);
+
+        
 
 		add(mainPanel);
 		
@@ -237,53 +254,51 @@ public class MainScreen extends JFrame {
 		c.gridy = 13;
 		c.weightx = 1;
 		c.fill = GridBagConstraints.NONE;
-		c.gridwidth = 1;
 		toolPane.add(startBtn, c);
 		
 		c.gridx = 1;
         c.gridy = 13;
-		c.gridwidth = 1;
         c.weightx = 1;
         toolPane.add(stopBtn, c);
 
-		c.gridx = 2; // Adjust the x-coordinate for positioning
-		c.gridy = 13; // Place the button on a new row below the others
-        c.gridwidth = 1;
-        c.weightx = 1;
-		toolPane.add(nextBtn, c);
-
-		statusLabel = new JLabel("Current Status: Awaiting Capture");
+        statusLabel = new JLabel("Current Status: Awaiting Capture");
 		c.gridx = 0;
 		c.gridy = 14;
+        c.gridwidth = 3;
 		toolPane.add(statusLabel, c);
 		
 		c.gridx = 0;
         c.gridy = 15;
+        c.gridwidth = 1;
         toolPane.add(timerLabel, c);
         
         c.gridx = 1;
         c.gridy = 15;
         toolPane.add(timer, c);
 
-		excpetionLabel.setVisible(false);
 		c.gridx = 0;
 		c.gridy = 42;
 		toolPane.add(excpetionLabel, c);
+        excpetionLabel.setVisible(false);
 
-		c.gridx = 2;
-		c.gridy = 42;
-		c.weightx = 1;
-		toolPane.add(versionNumberLabel, c);
-
-		c.anchor = GridBagConstraints.LINE_START;
-		c.gridx = -1;
+		c.anchor = GridBagConstraints.LAST_LINE_END;
+        c.insets = new Insets(2, 3, 2, 3);
+		c.gridx = 0;
 		c.gridy = 0;
-		c.weightx = 2;
-		extraPanel.add(backBtn, c);
+        c.ipady = 2;
+        c.gridwidth = 3;
+		navigationPanel.add(backBtn, c);
+
+        c.gridx += 3;
+		navigationPanel.add(nextBtn, c);
+
+        c.gridx += 3;
+        c.gridy = 1;
+        c.ipady = 0;
+		navigationPanel.add(versionNumberLabel, c);
 
 		setTitle("Android Video Capture Tool");
 		setIconImage(gvtIcon.getImage());
-		pack();
 		setLocationRelativeTo(null);
 		setDefaultCloseOperation(EXIT_ON_CLOSE);
 
@@ -299,19 +314,28 @@ public class MainScreen extends JFrame {
 	}
 
     private void loadTraceReplayerPanel() {
-        TraceReplayerPanel t = new TraceReplayerPanel(outputFolderTextField.getText());
-		t.setGetEventLog(getevent);
-		JScrollPane scrPane = new JScrollPane(t);
+        TraceReplayerPanel traceReplayerPanel = new TraceReplayerPanel(outputFolderTextField.getText());
+		traceReplayerPanel.setGetEventLog(getevent);
+		JScrollPane scrPane = new JScrollPane(traceReplayerPanel);
 		Border padding = BorderFactory.createEmptyBorder(2, 4, 2, 4);
 		scrPane.setBorder(padding);
 
 		mainPanel.removeAll();
-		mainPanel.add(extraPanel);
-		mainPanel.add(scrPane);
+
+        panelConstraints.gridheight = panelConstraints.gridwidth = 1;
+
+        panelConstraints.weighty = panelConstraints.weightx = 0.7;
+        panelConstraints.anchor = GridBagConstraints.CENTER;
+        panelConstraints.gridx = panelConstraints.gridy = 0;
+		mainPanel.add(scrPane, panelConstraints);
+
+        panelConstraints.weighty = panelConstraints.weightx = 0.3;
+        panelConstraints.anchor = GridBagConstraints.LAST_LINE_END;
+        panelConstraints.gridx = panelConstraints.gridy = 1;
+		mainPanel.add(navigationPanel, panelConstraints);
 
 		repaint();
 		revalidate();
-        pack();
     }
 
 	 public class TimerListener implements ActionListener {
@@ -395,7 +419,7 @@ public class MainScreen extends JFrame {
 	                                statusLabel.setForeground(Color.RED);
 	                                statusLabel.setText("Unable to Connect to Device!");
 	
-	                                BufferedImage previewPic = ImageIO.read(new File("libs" + File.separator + "img" + File.separator + "preview.png"));
+	                                BufferedImage previewPic = ImageIO.read(new File("lib" + File.separator + "img" + File.separator + "preview.png"));
 	                                previewPicLabel.setIcon(new ImageIcon(previewPic.getScaledInstance(120, 214, Image.SCALE_SMOOTH)));
 	                            }
 
@@ -411,14 +435,14 @@ public class MainScreen extends JFrame {
 	                            done();
 	                        }
 
-	                    }else{
+	                    } else {
 	                        System.out.println("Parameters not correct!");
 	                        statusLabel.setForeground(Color.RED);
 	                        statusLabel.setText("Please Ensure all Fields are Filled!!");
 
 	                        BufferedImage previewPic;
 	                        try {
-	                            previewPic = ImageIO.read(new File("libs" + File.separator + "img" + File.separator + "preview.png"));
+	                            previewPic = ImageIO.read(new File("lib" + File.separator + "img" + File.separator + "preview.png"));
 	                            previewPicLabel.setIcon(new ImageIcon(previewPic.getScaledInstance(120, 214, Image.SCALE_SMOOTH)));
 	                        } catch (IOException e) {
 	                            // TODO Auto-generated catch block
@@ -441,19 +465,15 @@ public class MainScreen extends JFrame {
 	            statusLabel.setText("Capturing Information...");
 	            loading.setLocation(getFrameXCoord(), getFrameYCoord());
 	            loading.setVisible(true);
-
 	        }
 	    }
 
 	public class startBtnListener implements ActionListener {
 		@Override
 		public void actionPerformed(ActionEvent e) {
-			
 		    SwingWorker<String, Void> worker2 = new SwingWorker<String, Void>() {
-		    	
                 @Override
                 protected String doInBackground() throws InterruptedException {
-                	//boolean validDir = true;
                     excpetionLabel.setVisible(false);
                     try {
                         File outputFile = new File(outputFolderTextField.getText());
@@ -484,7 +504,6 @@ public class MainScreen extends JFrame {
                     }
 
                     return "done";
-
                 }
                 @Override
                 protected void done() {
@@ -504,7 +523,7 @@ public class MainScreen extends JFrame {
                 
                 BufferedImage previewPic;
                 try {
-                    previewPic = ImageIO.read(new File("libs" + File.separator + "img" + File.separator + "preview.png"));
+                    previewPic = ImageIO.read(new File("lib" + File.separator + "img" + File.separator + "preview.png"));
                     previewPicLabel.setIcon(new ImageIcon(previewPic.getScaledInstance(120, 214, Image.SCALE_SMOOTH)));
                 } catch (IOException e2) {
                     // TODO Auto-generated catch block
@@ -514,7 +533,6 @@ public class MainScreen extends JFrame {
         }
 	}
 
-    // Swaps over to a screen that collects all the necessary trace replayer information
     public class nextBtnListener implements ActionListener {
         @Override
         public void actionPerformed(ActionEvent e) {
@@ -530,14 +548,23 @@ public class MainScreen extends JFrame {
         @Override
         public void actionPerformed(ActionEvent e) {
 			mainPanel.removeAll();
-			mainPanel.add(extraPanel);
-			mainPanel.add(toolPane);
+
+            panelConstraints.gridheight = panelConstraints.gridwidth = 1;
+
+            panelConstraints.weighty = panelConstraints.weightx = 0.7;
+            panelConstraints.anchor = GridBagConstraints.CENTER;
+            panelConstraints.gridx = panelConstraints.gridy = 0;
+            mainPanel.add(toolPane, panelConstraints);
+
+            panelConstraints.weighty = panelConstraints.weightx = 0.3;
+            panelConstraints.anchor = GridBagConstraints.LAST_LINE_END;
+            panelConstraints.gridx = panelConstraints.gridy = 1;
+            mainPanel.add(navigationPanel, panelConstraints);
 
 			nextBtn.setEnabled(false);
 			backBtn.setEnabled(false);
             revalidate();
             repaint();
-			pack();
         }
     }
 
@@ -561,15 +588,21 @@ public class MainScreen extends JFrame {
 		EventQueue.invokeLater(() -> {
 			MainScreen ex;
 			try {
+                FlatDarkLaf.setup();
+                UIManager.setLookAndFeel(new FlatDarkLaf());
 				ex = new MainScreen();
 				ex.setVisible(true);
-			} catch (IOException e) {
+                ex.setResizable(false);
+                //ex.setFocusable(false);
+                
+                double x = Toolkit.getDefaultToolkit().getScreenSize().getWidth()/2.0 - WINDOW_WIDTH/2;
+                double y = Toolkit.getDefaultToolkit().getScreenSize().getHeight()/2.0 - WINDOW_HEIGHT/2;
+
+                ex.setBounds(new Rectangle((int)x, (int)y, WINDOW_WIDTH, WINDOW_HEIGHT));
+			} catch (IOException | UnsupportedLookAndFeelException e) {
 				// TODO Auto-generated catch block
 				e.printStackTrace();
 			}
-
 		});
-
-		//getignoredDimensions(defaultIgnored);
 	}
 }
