@@ -31,8 +31,12 @@
  */
 package edu.semeru.android.capture.helpers;
 
-import java.io.*;
-import java.util.*;
+import java.util.List;
+import java.util.ArrayList;
+import java.io.InputStream;
+import java.io.InputStreamReader;
+import java.io.BufferedReader;
+import java.io.IOException;
 
 /**
  * @author KevinMoran
@@ -40,7 +44,7 @@ import java.util.*;
  */
 public class CmdProcessBuilder {
 
-	public static String executeCommand(String[] commands) throws InterruptedException,IOException{
+	public static String executeCommand(String[] commands) throws InterruptedException, IOException{
 
 		StringBuilder processOutputBuilder = new StringBuilder();
 		String output = null;
@@ -52,7 +56,6 @@ public class CmdProcessBuilder {
 		}
 
 		ProcessBuilder builder = new ProcessBuilder(command);
-		Map<String, String> environ = builder.environment();
 
 		final Process process = builder.start();
 		InputStream is = process.getInputStream();

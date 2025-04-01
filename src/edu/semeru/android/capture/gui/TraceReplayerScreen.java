@@ -1,67 +1,36 @@
+/**
+ * Created by Patrick ijieh on Feb 3, 2025
+ */
 package edu.semeru.android.capture.gui;
 
-import java.awt.BorderLayout;
 import java.awt.Color;
 import java.awt.Component;
-import java.awt.Dimension;
-import java.awt.EventQueue;
-import java.awt.Font;
 import java.awt.GridBagConstraints;
 import java.awt.GridBagLayout;
 import java.awt.Image;
 import java.awt.Insets;
-import java.awt.LayoutManager;
 import java.awt.event.ActionEvent;
 import java.awt.event.ActionListener;
-import java.awt.event.ItemEvent;
-import java.awt.image.BufferedImage;
 import java.io.File;
 import java.io.FileOutputStream;
 import java.io.IOException;
 import java.io.InputStream;
-import java.io.PrintWriter;
-import java.io.StringWriter;
-import java.nio.file.Path;
-import java.nio.file.Paths;
-import java.time.LocalTime;
-import java.time.format.DateTimeFormatter;
 import java.text.NumberFormat;
-import java.text.ParseException;
-import java.text.SimpleDateFormat;
-import java.util.List;
 
 import javax.imageio.ImageIO;
-import javax.swing.BorderFactory;
-import javax.swing.GroupLayout;
 import javax.swing.ImageIcon;
 import javax.swing.JButton;
-import javax.swing.JCheckBox;
-import javax.swing.JComponent;
-import javax.swing.JDialog;
-import javax.swing.JEditorPane;
 import javax.swing.JFileChooser;
 import javax.swing.JFormattedTextField;
-import javax.swing.JFrame;
 import javax.swing.JLabel;
-import javax.swing.JPanel;
-import javax.swing.JScrollPane;
-import javax.swing.JSeparator;
-import javax.swing.JTabbedPane;
-import javax.swing.JTextArea;
 import javax.swing.JTextField;
-import javax.swing.SwingConstants;
 import javax.swing.SwingWorker;
-import javax.swing.Timer;
-import javax.swing.UIManager;
 import javax.swing.text.NumberFormatter;
-import javax.swing.border.Border;
-import javax.swing.event.ChangeEvent;
-import javax.swing.event.ChangeListener;
 import javax.swing.filechooser.FileNameExtensionFilter;
 
 import edu.semeru.android.capture.controller.Controller;
 
-public class TraceReplayerPanel extends JPanel {
+public class TraceReplayerScreen extends Screen {
     private GridBagConstraints c;
     private JTextField androidSdkPathField;
     private JTextField aaptPathField;
@@ -74,6 +43,9 @@ public class TraceReplayerPanel extends JPanel {
 
     private JLabel statusLabel;
 
+    private int avdPortNumber;
+    private int adbPortNumber;
+    private int executionNumber;
     private String androidSdkPath;
     private String aaptPath;
     private String apkPath;
@@ -82,9 +54,8 @@ public class TraceReplayerPanel extends JPanel {
     private File getevent;
 
 
-    public TraceReplayerPanel(String output) {
+    public TraceReplayerScreen() {
         super(new GridBagLayout());
-        this.outputPath = output;
         initializeGUI();
     }
 
@@ -216,7 +187,7 @@ public class TraceReplayerPanel extends JPanel {
 			JFileChooser fc = new JFileChooser();
 
 			fc.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
-			fc.showOpenDialog(TraceReplayerPanel.this);
+			fc.showOpenDialog(TraceReplayerScreen.this);
 			if (fc.getSelectedFile() != null){
 				androidSdkPath = fc.getSelectedFile().getAbsolutePath();
 				androidSdkPathField.setText(androidSdkPath);
@@ -231,7 +202,7 @@ public class TraceReplayerPanel extends JPanel {
 			JFileChooser fc = new JFileChooser();
 
 			fc.setFileSelectionMode(JFileChooser.DIRECTORIES_ONLY);
-			fc.showOpenDialog(TraceReplayerPanel.this);
+			fc.showOpenDialog(TraceReplayerScreen.this);
 			if (fc.getSelectedFile() != null) {
 				aaptPath = fc.getSelectedFile().getAbsolutePath();
 				aaptPathField.setText(aaptPath);
@@ -247,7 +218,7 @@ public class TraceReplayerPanel extends JPanel {
             FileNameExtensionFilter filter = new FileNameExtensionFilter("Android Package Kit (APK) files", "apk");
             fc.setFileFilter(filter);
 			fc.setFileSelectionMode(JFileChooser.FILES_ONLY);
-			fc.showOpenDialog(TraceReplayerPanel.this);
+			fc.showOpenDialog(TraceReplayerScreen.this);
 			if (fc.getSelectedFile() != null) {
 				apkPath = fc.getSelectedFile().getAbsolutePath();
 				apkPathField.setText(apkPath);
@@ -258,8 +229,30 @@ public class TraceReplayerPanel extends JPanel {
     public class startBtnListener implements ActionListener {
         @Override
 		public void actionPerformed(ActionEvent e) {
-            TraceReplayerPanel.this.getComponents();
-            for (Component c : TraceReplayerPanel.this.getComponents()) {
+            SwingWorker<Integer, Void> worker = new SwingWorker<Integer, Void>() {
+                @Override
+                protected Integer doInBackground() throws InterruptedException {
+                    executeTraceReplayer();
+                    return 0;
+                }
+
+                @Override
+                protected void done() { 
+                    statusLabel.setForeground(Color.GREEN);
+                    statusLabel.setText("Ready!");
+                    backBtn.setEnabled(true);
+                }
+            };
+
+            nextBtn.setEnabled(false);
+            backBtn.setEnabled(false);
+            worker.execute();
+		}
+    }
+
+    private void executeTraceReplayer() {
+        TraceReplayerScreen.this.getComponents();
+            for (Component c : TraceReplayerScreen.this.getComponents()) {
                 if (c instanceof JTextField) {
                     if (((JTextField)c).getText() == null || ((JTextField)c).getText().isEmpty()) {
                         statusLabel.setForeground(Color.RED);
@@ -268,9 +261,7 @@ public class TraceReplayerPanel extends JPanel {
                     }
                 }
             }
-            int avdPortNumber;
-            int adbPortNumber;
-            int executionNumber;
+            
             try {
                 avdPortNumber = Integer.parseInt(avdPortField.getText());
                 adbPortNumber = Integer.parseInt(adbPortField.getText());
@@ -288,9 +279,6 @@ public class TraceReplayerPanel extends JPanel {
             } catch (IOException ex) {
                 ex.printStackTrace();
             }
-            statusLabel.setForeground(Color.GREEN);
-            statusLabel.setText("Ready!");
-		}
     }
 
     // This works for sure
@@ -327,5 +315,10 @@ public class TraceReplayerPanel extends JPanel {
     public void setGetEventLog(File geteventlog) {
         if (geteventlog != null)
             this.getevent = geteventlog;
+    }
+
+    public void setOutputPath(String output) {
+        if (output != null)
+            this.outputPath = output;
     }
 }

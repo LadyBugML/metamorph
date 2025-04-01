@@ -117,17 +117,14 @@ public class Controller {
 
     public static Process startVideoCapture(String adbPath)
             throws InterruptedException, IOException {
-
-        String androidSDKPath = getAndroidSDKPath();
-        
-        String[] uiCommand1;
+        String[] uiCommand;
 
         System.out.println("Capturing Screenshot...");
         if (SystemUtils.IS_OS_MAC || SystemUtils.IS_OS_LINUX) {
-            uiCommand1 = new String[] { adbPath,
+            uiCommand = new String[] { adbPath,
                     "shell", "screenrecord", "/sdcard/video.mp4", "--bit-rate", "8000000" };
         } else {
-            uiCommand1 = new String[] { adbPath,
+            uiCommand = new String[] { adbPath,
                     "shell", "screenrecord", "/sdcard/video.mp4", "--bit-rate", "8000000" };
 
         }
@@ -135,56 +132,42 @@ public class Controller {
         // create a new process
         System.out.println("Creating Process");
 
-        ProcessBuilder builder = new ProcessBuilder(uiCommand1);
+        ProcessBuilder builder = new ProcessBuilder(uiCommand);
         Process videoprocess = builder.start();
 
         return videoprocess;
-        
-        // String output1 = CmdProcessBuilder.executeCommand(uiCommand1);
-        // System.out.println(output1);
-        // String output2 = CmdProcessBuilder.executeCommand(uiCommand2);
-        // System.out.println(output2);
     }
     
     public static void pullVideo(String outputFile, String adbPath)
             throws InterruptedException, IOException {
-
-        String androidSDKPath = getAndroidSDKPath();
-        
-        String[] uiCommand2;
+        String[] uiCommand;
 
         System.out.println("Capturing Screenshot...");
         if (SystemUtils.IS_OS_MAC || SystemUtils.IS_OS_LINUX) {
             System.out.println("Saving Screenshot to specified File path...");
-            uiCommand2 = new String[] {adbPath,
+            uiCommand = new String[] {adbPath,
                     "pull", "/sdcard/video.mp4", outputFile };
         } else {
             System.out.println("Saving Screenshot to specified File path...");
-            uiCommand2 = new String[] { adbPath,
+            uiCommand = new String[] { adbPath,
                     "pull", "/sdcard/video.mp4", outputFile };
 
         }
 
-        
-        // String output1 = CmdProcessBuilder.executeCommand(uiCommand1);
-        // System.out.println(output1);
-         String output2 = CmdProcessBuilder.executeCommand(uiCommand2);
-         System.out.println(output2);
+         String output = CmdProcessBuilder.executeCommand(uiCommand);
+         System.out.println(output);
     }
     
     public static Process startGetEventCapture(String outputPath, String adbPath)
             throws InterruptedException, IOException {
-
-        String androidSDKPath = getAndroidSDKPath();
-        
-        String[] uiCommand1;
+        String[] uiCommand;
 
         System.out.println("Capturing getevent...");
         if (SystemUtils.IS_OS_MAC || SystemUtils.IS_OS_LINUX) {
-            uiCommand1 = new String[] { adbPath,
+            uiCommand = new String[] { adbPath,
                     "shell", "getevent", "-t"};
         } else {
-            uiCommand1 = new String[] {adbPath,
+            uiCommand = new String[] {adbPath,
                     "shell", "getevent", "-t"};
 
         }
@@ -193,7 +176,7 @@ public class Controller {
         System.out.println("Creating Process");
         File testoutput = new File(outputPath);
         testoutput.createNewFile();
-        ProcessBuilder builder = new ProcessBuilder(uiCommand1);
+        ProcessBuilder builder = new ProcessBuilder(uiCommand);
         builder.redirectOutput(testoutput);
         Process geteventprocess = builder.start();
 
@@ -287,10 +270,7 @@ public class Controller {
         return configFileHandle;
     }
     
-
-    // Needs more testing witha actual config file, not sure where the output of the JAR goes?
 	public static int runJarWithConfig(File configFile, File extractedJar) {
-		// File extractedJar = extractEmbeddedJar(); // Extract JAR
 		if (extractedJar == null) {
 			System.err.println("Failed to extract JAR.");
 			return 1;
@@ -314,12 +294,12 @@ public class Controller {
 			try (BufferedReader reader = new BufferedReader(new InputStreamReader(process.getInputStream()))) {
 				String line;
 				while ((line = reader.readLine()) != null) {
-					System.out.println("JAR Output: " + line);
+					System.out.println(extractedJar.getName() + ": " + line);
 				}
 			}
 	
 			int exitCode = process.waitFor();
-			System.out.println("JAR Execution Finished with exit code: " + exitCode);
+			System.out.println(extractedJar.getName() + " execution finished with exit code: " + exitCode);
             return 0;
 		} catch (IOException | InterruptedException ex) {
 			ex.printStackTrace();
