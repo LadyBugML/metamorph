@@ -114,7 +114,7 @@ public class TraceReplayerScreen extends Screen {
         executionNumField.setText("1");
 
         c = new GridBagConstraints();
-        c.insets = new Insets(2, 4, 2, 4);
+        c.insets = new Insets(2, 0, 2, 0);
 		c.anchor = GridBagConstraints.LINE_START;
 
         // Labels and Text Fields
@@ -178,6 +178,18 @@ public class TraceReplayerScreen extends Screen {
 		c.gridy++;
         c.weightx = 1;
 		this.add(statusLabel, c);
+
+        String commonSDKPath = Controller.getSDKPath();
+        String commonBuildToolsPath = Controller.getAAPTPath();
+        if (commonSDKPath.length() > 0) {
+            androidSdkPath = commonSDKPath;
+            androidSdkPathField.setText(commonSDKPath);
+        }
+        
+        if (commonBuildToolsPath.length() > 0) {
+            aaptPath = commonBuildToolsPath;
+            aaptPathField.setText(commonBuildToolsPath);
+        }
     }
 
     public class androidSdkPathBtnListener implements ActionListener {

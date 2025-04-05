@@ -36,6 +36,10 @@ import java.io.File;
 import java.io.FileWriter;
 import java.io.IOException;
 import java.io.InputStreamReader;
+import java.nio.file.Path;
+import java.nio.file.Paths;
+import java.nio.file.Files;
+import java.util.stream.Stream;
 import java.lang.reflect.Field;
 
 import org.apache.commons.lang.SystemUtils;
@@ -48,6 +52,8 @@ import edu.semeru.android.capture.helpers.CmdProcessBuilder;
  */
 public class Controller {
 
+    public static boolean IS_OS_UNIX = SystemUtils.IS_OS_MAC || SystemUtils.IS_OS_LINUX;
+
     public static void captureUIDump(String outputFile)
             throws InterruptedException, IOException {
 
@@ -59,7 +65,7 @@ public class Controller {
 
         System.out.println("Getting Device Ready...");
 
-        if (SystemUtils.IS_OS_MAC || SystemUtils.IS_OS_LINUX) {
+        if (IS_OS_UNIX) {
             uiCommand1 = new String[] { androidSDKPath + File.separator + "platform-tools" + File.separator + "adb",
                     "shell", "mkdir", "/sdcard/uimonkeyautomator" };
             System.out.println("Capturing UI-Dump xml...");
@@ -94,7 +100,7 @@ public class Controller {
         String[] uiCommand2;
 
         System.out.println("Capturing Screenshot...");
-        if (SystemUtils.IS_OS_MAC || SystemUtils.IS_OS_LINUX) {
+        if (IS_OS_UNIX) {
             uiCommand1 = new String[] { androidSDKPath + File.separator + "platform-tools" + File.separator + "adb",
                     "shell", "/system/bin/screencap", "-p", "/sdcard/screen.png" };
             System.out.println("Saving Screenshot to specified File path...");
@@ -120,7 +126,7 @@ public class Controller {
         String[] uiCommand;
 
         System.out.println("Capturing Screenshot...");
-        if (SystemUtils.IS_OS_MAC || SystemUtils.IS_OS_LINUX) {
+        if (IS_OS_UNIX) {
             uiCommand = new String[] { adbPath,
                     "shell", "screenrecord", "/sdcard/video.mp4", "--bit-rate", "8000000" };
         } else {
@@ -143,7 +149,7 @@ public class Controller {
         String[] uiCommand;
 
         System.out.println("Capturing Screenshot...");
-        if (SystemUtils.IS_OS_MAC || SystemUtils.IS_OS_LINUX) {
+        if (IS_OS_UNIX) {
             System.out.println("Saving Screenshot to specified File path...");
             uiCommand = new String[] {adbPath,
                     "pull", "/sdcard/video.mp4", outputFile };
@@ -163,7 +169,7 @@ public class Controller {
         String[] uiCommand;
 
         System.out.println("Capturing getevent...");
-        if (SystemUtils.IS_OS_MAC || SystemUtils.IS_OS_LINUX) {
+        if (IS_OS_UNIX) {
             uiCommand = new String[] { adbPath,
                     "shell", "getevent", "-t"};
         } else {
@@ -255,15 +261,20 @@ public class Controller {
         
         String pythonScriptsPath = String.format("%s" + File.separator + "lib" + File.separator + "python-scripts" + File.separator, System.getProperty("user.dir"));
         FileWriter configFileWriter = new FileWriter(outputPath + File.separator + "config.yaml");
-        configFileWriter.write("androidSDKPath: " + androidSdkPath + "\n");
-        configFileWriter.write("pythonScriptsPath: " + pythonScriptsPath + "\n");
-        configFileWriter.write("aaptPath: " + aaptPath + "\n");
-        configFileWriter.write("apkPath: " + apkPath + "\n");
-        configFileWriter.write("getEventFile: " + getEventFilePath + "\n");
-        configFileWriter.write("outputFolder: " + outputPath + "\n");
-        configFileWriter.write("avdPort: " + avdPort + "\n");
-        configFileWriter.write("adbPort: " + adbPort + "\n");
-        configFileWriter.write("executionNum: " + executionNum + "\n");
+
+        String configuration = new StringBuilder()
+            .append("androidSDKPath: " + androidSdkPath + "\n")
+            .append("pythonScriptsPath: " + pythonScriptsPath + "\n")
+            .append("aaptPath: " + aaptPath + "\n")
+            .append("apkPath: " + apkPath + "\n")
+            .append("getEventFile: " + getEventFilePath + "\n")
+            .append("outputFolder: " + outputPath + "\n")
+            .append("avdPort: " + avdPort + "\n")
+            .append("adbPort: " + adbPort + "\n")
+            .append("executionNum: " + executionNum + "\n")
+            .toString();
+
+        configFileWriter.write(configuration);
         configFileWriter.close();
 
         File configFileHandle = new File(outputPath + File.separator + "config.yaml");
@@ -306,4 +317,73 @@ public class Controller {
             return 1;
 		}
 	}
+
+    public static String getSDKPath() {
+        String userhome = System.getProperty("user.home");
+        Path sdkPath;
+        if (SystemUtils.IS_OS_LINUX) {
+            sdkPath = Paths.get(userhome, "Android", "Sdk");
+        } else if (SystemUtils.IS_OS_MAC) {
+            sdkPath = Paths.get(userhome,  "Library", "Android", "sdk");
+        } else {
+            sdkPath = Paths.get(userhome, "AppData", "Local", "Android", "Sdk");
+        }
+
+        if (Files.exists(sdkPath)) {
+            System.out.println("Found Android SDK location at " + sdkPath.toString());
+            return sdkPath.toString();
+        }
+
+        return "";
+    }
+
+    public static String getADBPath() {
+        String sdkPath = getSDKPath();
+        if (sdkPath.length() == 0) {
+            return "";
+        }
+
+        Path adbPath;
+        if (IS_OS_UNIX)
+            adbPath = Paths.get(sdkPath, "platform-tools", "adb");
+        else
+            adbPath = Paths.get(sdkPath, "platform-tools", "adb.exe");
+        
+        if (Files.exists(adbPath)) {
+            return adbPath.toString();
+        }
+
+        return "";
+    }
+
+    public static String getAAPTPath() {
+        String sdkPath = getSDKPath();
+        if (sdkPath.length() == 0) {
+            return "";
+        }
+
+        Path aaptPath;
+        if (IS_OS_UNIX)
+            aaptPath = Paths.get(sdkPath, "build-tools");
+        else
+            aaptPath = Paths.get(sdkPath, "build-tools");
+        
+        try (Stream<Path> dirs = Files.walk(aaptPath, 1)) {
+            Object[] versionPaths = dirs.filter(Files::isDirectory)
+                .filter(path -> !path.equals(aaptPath))
+                .filter(path -> path.getFileName().toString().contains("."))
+                .map(Path::toString)
+                .sorted()
+                .toArray();
+            
+            if (versionPaths.length > 0) {
+                String newest = (String)versionPaths[versionPaths.length-1];
+                return newest;
+            }
+        } catch (IOException e) {
+            e.printStackTrace();
+        }
+
+        return "";
+    }
 }

@@ -1,3 +1,6 @@
+/**
+ * Created by Patrick ijieh on Mar 24, 2025
+ */
 package edu.semeru.android.capture.gui;
 
 import java.awt.LayoutManager;

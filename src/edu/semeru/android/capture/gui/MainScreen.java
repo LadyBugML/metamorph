@@ -34,7 +34,7 @@ import com.formdev.flatlaf.FlatDarkLaf;
 public class MainScreen extends JFrame {
     private static int WINDOW_WIDTH = 640;
     private static int WINDOW_HEIGHT = 480;
-    private static int NUM_SCREENS = 2;
+    private static int NUM_SCREENS = 3;
 
     private int panelId = 0;
 
@@ -47,6 +47,7 @@ public class MainScreen extends JFrame {
 	private JButton nextBtn;
 	private JButton backBtn;
 
+    private WelcomeScreen welcomeScreen;
     private VideoCaptureScreen videoCaptureScreen;
     private TraceReplayerScreen traceReplayerScreen;
 
@@ -55,27 +56,34 @@ public class MainScreen extends JFrame {
 	}
 
 	private void initializeGUI() throws IOException {
-
-        videoCaptureScreen = new VideoCaptureScreen();
-        traceReplayerScreen = new TraceReplayerScreen();
-
         JLabel versionNumberLabel = new JLabel("v0.2");
         ImageIcon gvtIcon = new ImageIcon("resources/GVT-Logo.png");
 
-		nextBtn = new JButton("Next");
+		nextBtn = new JButton("Next >");
 		nextBtn.setToolTipText("Click here to go to the next screen.");
-        nextBtn.setEnabled(false);
+        nextBtn.setEnabled(true);
 		nextBtn.addActionListener(new nextBtnListener());
 
-        backBtn = new JButton("Back");
+        backBtn = new JButton("< Back");
         nextBtn.setToolTipText("Click here to go to the previous screen.");
         backBtn.setEnabled(false);
+        backBtn.setVisible(false);
 		backBtn.addActionListener(new backBtnListener());
 
+        welcomeScreen = new WelcomeScreen();
         videoCaptureScreen = new VideoCaptureScreen();
+        traceReplayerScreen = new TraceReplayerScreen();
+        
+        welcomeScreen.setNextBtn(nextBtn);
+        welcomeScreen.setBackBtn(backBtn);
+
         videoCaptureScreen.setNextBtn(nextBtn);
         videoCaptureScreen.setBackBtn(backBtn);
-		currentPanel = videoCaptureScreen;
+
+        traceReplayerScreen.setNextBtn(nextBtn);
+        traceReplayerScreen.setBackBtn(backBtn);
+
+		currentPanel = welcomeScreen;
         
 		navigationPanel = new JPanel(new GridBagLayout());
 		mainPanel = new JPanel();
@@ -144,17 +152,31 @@ public class MainScreen extends JFrame {
         backBtn.setEnabled(true);
 		nextBtn.setEnabled(false);
 
+        if (panelId > 0) {
+            backBtn.setVisible(true);
+        } else {
+            backBtn.setVisible(false);
+        }
+
         Screen newScreen;
+
         switch(panelId) {
+            case 0:
+                newScreen = welcomeScreen;
+                nextBtn.setEnabled(true);
+                break;
             case 1:
+                newScreen = videoCaptureScreen;
+                break;
+            case 2:
                 newScreen = traceReplayerScreen;
                 traceReplayerScreen.setOutputPath(videoCaptureScreen.getOutputPath());
                 traceReplayerScreen.setGetEventLog(videoCaptureScreen.getEventLog());
                 break;
 
             default:
-                newScreen = videoCaptureScreen;
-                backBtn.setEnabled(false);
+                newScreen = welcomeScreen;
+                nextBtn.setEnabled(true);
                 break;
         }
 

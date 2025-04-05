@@ -103,8 +103,8 @@ public class VideoCaptureScreen extends Screen {
         stopBtn.setEnabled(false);
 		
 		try {
-			Image fileOpenImage = ImageIO.read(new File("resources/File-Open.png"));
-			fileOpenImage = fileOpenImage.getScaledInstance(25, 25, Image.SCALE_DEFAULT);
+			Image fileOpenImage = ImageIO.read(new File("resources/File-Open.png"))
+                                         .getScaledInstance(25, 25, Image.SCALE_DEFAULT);
 			outputFolderSelectorBtn.setIcon(new ImageIcon(fileOpenImage));
 			adbSelectorBtn.setIcon(new ImageIcon(fileOpenImage));
 		} catch (IOException e) {
@@ -203,6 +203,12 @@ public class VideoCaptureScreen extends Screen {
 		loading.setLocationRelativeTo(this);
 		loading.setDefaultCloseOperation(JDialog.DO_NOTHING_ON_CLOSE);
 		loading.setModal(true);
+
+        String commonADBPath = Controller.getADBPath();
+        if (commonADBPath.length() > 0) {
+            adbPath = commonADBPath;
+            adbTextField.setText(commonADBPath);
+        }
     }
 
     public class TimerListener implements ActionListener {
