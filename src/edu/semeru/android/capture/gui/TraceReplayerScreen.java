@@ -73,7 +73,7 @@ public class TraceReplayerScreen extends Screen {
         JLabel avdPortLabel = new JLabel("AVD Emulator Port Number (Default is 5554):");
         JLabel adbPortLabel = new JLabel("ADB Server Port Number (Default is 5037):");
         JLabel executionNumLabel = new JLabel("(Optional) Execution Number (Default is 1):");
-        statusLabel = new JLabel("");
+        statusLabel = new JLabel(" ");
         
         JButton androidSdkPathSelectorBtn = new JButton();
         androidSdkPathSelectorBtn.addActionListener(new androidSdkPathBtnListener());
@@ -250,8 +250,6 @@ public class TraceReplayerScreen extends Screen {
 
                 @Override
                 protected void done() { 
-                    statusLabel.setForeground(Color.GREEN);
-                    statusLabel.setText("Ready!");
                     backBtn.setEnabled(true);
                     startBtn.setEnabled(true);
                 }
@@ -293,6 +291,9 @@ public class TraceReplayerScreen extends Screen {
             } catch (IOException ex) {
                 ex.printStackTrace();
             }
+
+            statusLabel.setForeground(Color.GREEN);
+            statusLabel.setText("Ready!");
     }
 
     // This works for sure
