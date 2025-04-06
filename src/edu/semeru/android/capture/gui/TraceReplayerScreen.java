@@ -253,11 +253,13 @@ public class TraceReplayerScreen extends Screen {
                     statusLabel.setForeground(Color.GREEN);
                     statusLabel.setText("Ready!");
                     backBtn.setEnabled(true);
+                    startBtn.setEnabled(true);
                 }
             };
 
             nextBtn.setEnabled(false);
             backBtn.setEnabled(false);
+            startBtn.setEnabled(false);
             worker.execute();
 		}
     }
